@@ -7,7 +7,6 @@ import {
   unfollowUser,
   getFollowers,
   getFollowing,
-  getAllUsersProfile,
   getUsersProfile,
   getAllUsers,
 } from "../controllers/userController.js";
