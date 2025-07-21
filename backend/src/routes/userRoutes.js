@@ -8,10 +8,14 @@ import {
   getFollowers,
   getFollowing,
   getAllUsersProfile,
+  getUsersProfile,
+  getAllUsers,
 } from "../controllers/userController.js";
 
+
+router.get("/", protect, getUsersProfile);
+router.get("/all",protect,getAllUsers);
 router.get("/:id", protect, getUserProfile);
-router.get("/", protect, getAllUsersProfile);
 router.put("/:id/follow", protect, followUser);
 router.put("/:id/unfollow", protect, unfollowUser);
 router.get("/:id/followers", protect, getFollowers);
