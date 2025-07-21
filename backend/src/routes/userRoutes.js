@@ -11,9 +11,8 @@ import {
   getAllUsers,
 } from "../controllers/userController.js";
 
-
 router.get("/", protect, getUsersProfile);
-router.get("/all",protect,getAllUsers);
+router.get("/all", protect, getAllUsers);
 router.get("/:id", protect, getUserProfile);
 router.put("/:id/follow", protect, followUser);
 router.put("/:id/unfollow", protect, unfollowUser);

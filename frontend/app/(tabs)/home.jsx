@@ -13,7 +13,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PostCard from '../../component/home/PostCard';
-import AllUsers from '../../component/home/UserPofile';
+import UserProfile from '../../component/home/UserPofile';
+import AllUsers from '../../component/home/AllUsers';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -73,7 +74,9 @@ const HomeScreen = () => {
           }
           contentContainerStyle={styles.scrollContent}
         >
-           <AllUsers />
+           {/* <UserProfile/> */}
+           <AllUsers/>
+
           {posts.map((post) => (
             <PostCard key={post._id} post={post} />
           ))}

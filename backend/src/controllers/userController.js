@@ -1,25 +1,24 @@
-import User from "../models/userModel.js"
+import User from "../models/userModel.js";
 
 // GET user profile
 export const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id.trim()).select('-password');
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(req.params.id.trim()).select("-password").
+    populate("followers" ," name email bio followers following");
+    if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-
-
 export const getUsersProfile = async (req, res) => {
   try {
-    console.log(req.user._id)
+    console.log(req.user._id);
     const user = await User.findById(req.user._id)
       .select("-password")
-      .populate("followers", "name profilePic")       // Optional: if you want followers' details
-      .populate("following", "name profilePic");       // Optional: if you want following details
+      .populate("followers", "name profilePic") // Optional: if you want followers' details
+      .populate("following", "name profilePic"); // Optional: if you want following details
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -44,8 +43,6 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-
-
 // FOLLOW user
 export const followUser = async (req, res) => {
   const userId = req.user._id;
@@ -59,7 +56,8 @@ export const followUser = async (req, res) => {
     const targetUser = await User.findById(targetId);
     const currentUser = await User.findById(userId);
 
-    if (!targetUser || !currentUser) return res.status(404).json({ message: "User not found" });
+    if (!targetUser || !currentUser)
+      return res.status(404).json({ message: "User not found" });
 
     if (targetUser.followers.includes(userId)) {
       return res.status(400).json({ message: "Already following this user" });
@@ -90,10 +88,15 @@ export const unfollowUser = async (req, res) => {
     const targetUser = await User.findById(targetId);
     const currentUser = await User.findById(userId);
 
-    if (!targetUser || !currentUser) return res.status(404).json({ message: "User not found" });
+    if (!targetUser || !currentUser)
+      return res.status(404).json({ message: "User not found" });
 
-    targetUser.followers = targetUser.followers.filter(id => id.toString() !== userId.toString());
-    currentUser.following = currentUser.following.filter(id => id.toString() !== targetId.toString());
+    targetUser.followers = targetUser.followers.filter(
+      (id) => id.toString() !== userId.toString()
+    );
+    currentUser.following = currentUser.following.filter(
+      (id) => id.toString() !== targetId.toString()
+    );
 
     await targetUser.save();
     await currentUser.save();
@@ -107,7 +110,10 @@ export const unfollowUser = async (req, res) => {
 // GET followers
 export const getFollowers = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).populate('followers', 'name username profilePic');
+    const user = await User.findById(req.params.id).populate(
+      "followers",
+      "name username profilePic"
+    );
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user.followers);
   } catch (err) {
@@ -118,7 +124,10 @@ export const getFollowers = async (req, res) => {
 // GET following
 export const getFollowing = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).populate('following', 'name username profilePic');
+    const user = await User.findById(req.params.id).populate(
+      "following",
+      "name username profilePic"
+    );
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user.following);
   } catch (err) {
