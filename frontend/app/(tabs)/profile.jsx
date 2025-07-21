@@ -1,11 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-import LogoutButton from './../../component/profile/Logout'
 
-export default function profile() {
+const profile = () => {
   return (
     <View>
-      <LogoutButton/>
+      <Text>profile</Text>
     </View>
   )
 }
+
+export default profile

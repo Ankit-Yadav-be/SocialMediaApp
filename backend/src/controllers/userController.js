@@ -11,6 +11,27 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
+import User from "../models/User.js";
+
+export const getAllUsersProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select("name email profilePic followers following")
+      .populate("followers", "name profilePic")       // Optional: if you want followers' details
+      .populate("following", "name profilePic");       // Optional: if you want following details
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
 // FOLLOW user
 export const followUser = async (req, res) => {
   const userId = req.user._id;

@@ -6,10 +6,14 @@ import {
   ScrollView,
   RefreshControl,
   ActivityIndicator,
+  StatusBar,
+  
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PostCard from '../../component/home/PostCard';
+import AllUsers from '../../component/home/AllUsers';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -28,7 +32,6 @@ const HomeScreen = () => {
           },
         }
       );
-      console.log('Feed Response Data:', data);
       setPosts(data);
     } catch (error) {
       console.error('Failed to fetch feed:', error);
@@ -48,26 +51,36 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+ 
+     <View style={styles.container}>
+      <AllUsers/>
+      <StatusBar backgroundColor="#f4f6f8" barStyle="dark-content" />
       {loading ? (
-        <ActivityIndicator size="large" color="#555" />
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#4A90E2" />
+          <Text style={styles.loaderText}>Loading feed...</Text>
+        </View>
       ) : posts.length === 0 ? (
-        <Text style={styles.noPosts}>
-          No posts to show. You might not be following anyone yet, or there are no posts.
-        </Text>
+        <View style={styles.noPostsContainer}>
+          <Text style={styles.noPosts}>
+            No posts available. Try following more people!
+          </Text>
+        </View>
       ) : (
         <ScrollView
+          nestedScrollEnabled={true}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           contentContainerStyle={styles.scrollContent}
         >
           {posts.map((post) => (
-            <PostCard key={post._id} post={post}  />
+            <PostCard key={post._id} post={post} />
           ))}
         </ScrollView>
       )}
     </View>
+  
   );
 };
 
@@ -76,16 +89,34 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f6f8', // soft light gray background
     paddingTop: 10,
-  },
-  noPosts: {
-    textAlign: 'center',
-    marginTop: 20,
-    fontSize: 16,
-    color: '#777',
   },
   scrollContent: {
     paddingBottom: 20,
+    paddingHorizontal: 12,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loaderText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  noPostsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noPosts: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#999',
+    fontStyle: 'italic',
+    paddingHorizontal: 20,
   },
 });

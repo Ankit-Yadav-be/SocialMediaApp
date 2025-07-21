@@ -7,9 +7,11 @@ import {
   unfollowUser,
   getFollowers,
   getFollowing,
+  getAllUsersProfile,
 } from "../controllers/userController.js";
 
 router.get("/:id", protect, getUserProfile);
+router.get("/allUsers", protect , getAllUsersProfile);
 router.put("/:id/follow", protect, followUser);
 router.put("/:id/unfollow", protect, unfollowUser);
 router.get("/:id/followers", protect, getFollowers);
