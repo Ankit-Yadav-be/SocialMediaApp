@@ -6,22 +6,26 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {useAuth} from "../../context/authContext"
+import { useAuth } from '../../context/authContext';
+
 const AllUsers = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
+
   const fetchUserProfile = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/user/profile', {
-        headers: {
-          Authorization: `${token}`, // Replace with real token
-        },
-      });
+      const res = await axios.get(
+        'https://social-media-app-six-nu.vercel.app/api/users/allUsers',
+        
+           { headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log('Fetched User:', res.data);
       setUserData(res.data);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -34,36 +38,64 @@ const AllUsers = () => {
     fetchUserProfile();
   }, []);
 
-  const renderFollower = ({ item }) => (
-    <View style={styles.followerContainer}>
-      <Image source={{ uri: item.profilePic }} style={styles.avatar} />
-      <Text style={styles.name}>{item.name}</Text>
-    </View>
-  );
+  const renderFollower = ({ item }) => {
+    if (!item) return null;
+
+    return (
+      <View style={styles.followerContainer}>
+        <Image
+          source={{
+            uri: item.profilePic || 'https://via.placeholder.com/60',
+          }}
+          style={styles.avatar}
+        />
+        <Text style={styles.name}>{item.name || 'No Name'}</Text>
+      </View>
+    );
+  };
+
+  if (loading || !userData) {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <ActivityIndicator size="large" color="#000" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      {loading ? (
-        <ActivityIndicator size="large" color="#000" />
-      ) : (
-        <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.header}>My Profile</Text>
-          <Image source={{ uri: userData.profilePic }} style={styles.mainAvatar} />
-          <Text style={styles.mainName}>{userData.name}</Text>
-          <Text style={styles.email}>{userData.email}</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.header}>My Profile</Text>
 
-          <Text style={styles.sectionTitle}>Followers</Text>
-          <FlatList
-            data={userData.followers}
-            keyExtractor={(item) => item._id}
-            renderItem={renderFollower}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          />
+        <Image
+          source={{
+            uri: userData.profilePic || 'https://via.placeholder.com/120',
+          }}
+          style={styles.mainAvatar}
+        />
+        <Text style={styles.mainName}>{userData.name || 'No Name'}</Text>
+        <Text style={styles.email}>{userData.email || 'No Email'}</Text>
 
-          {/* You can add nested follower rendering here if you deeply populate */}
-        </ScrollView>
-      )}
+        <Text style={styles.sectionTitle}>Followers</Text>
+        <FlatList
+          data={userData.followers || []}
+          keyExtractor={(item) => item._id}
+          renderItem={renderFollower}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+
+        <Text style={styles.sectionTitle}>Following</Text>
+        <FlatList
+          data={userData.following || []}
+          keyExtractor={(item) => item._id}
+          renderItem={renderFollower}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -114,6 +146,8 @@ const styles = StyleSheet.create({
   name: {
     marginTop: 5,
     fontSize: 14,
+    maxWidth: 80,
+    textAlign: 'center',
   },
 });
 
