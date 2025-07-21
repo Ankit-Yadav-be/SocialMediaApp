@@ -20,34 +20,34 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-const handleLogin = async () => {
-  if (!email || !password) {
-    Alert.alert('Error', 'Please fill all fields');
-    return;
-  }
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill all fields');
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await axios.post('https://social-media-app-six-nu.vercel.app//api/auth/login', {
-      email,
-      password,
-    });
+      const res = await axios.post('https://social-media-app-six-nu.vercel.app//api/auth/login', {
+        email,
+        password,
+      });
 
-    const { token, user } = res.data;
+      const { token, user } = res.data;
 
-    await AsyncStorage.setItem('token', token);
-    await AsyncStorage.setItem('user', JSON.stringify(user));
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
 
-    router.replace('/home');
-    console.log("Login Successfull..")
-  } catch (err) {
-    console.error('Login error:', err.response?.data || err.message);
-    Alert.alert('Login Failed', err.response?.data?.message || 'Something went wrong');
-  } finally {
-    setLoading(false);
-  }
-};
+      router.replace('/home');
+      console.log("Login Successfull..")
+    } catch (err) {
+      console.error('Login error:', err.response?.data || err.message);
+      Alert.alert('Login Failed', err.response?.data?.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 

@@ -31,24 +31,22 @@ export const createPost = async (req, res) => {
 //get feed
 export const getFeedPosts = async (req, res) => {
   try {
-    // 1. Get current user and followed users
-    console.log(req.user._id);
     const currentUser = await User.findById(req.user._id);
     const followedUsers = currentUser.following;
-
-    // 2. Include own posts as well
     const allUsersToFetch = [...followedUsers, req.user._id];
 
-    // 3. Get posts of all followed + self
     const posts = await Post.find({ user: { $in: allUsersToFetch } })
       .sort({ createdAt: -1 })
-      .populate("user", "name email profilePic");
+      .populate("user", "name email profilePic")              // Post author
+      .populate("comments.user", "name email profilePic")     // Comment authors
+      .populate("likes", "name email profilePic");            // Users who liked the post
 
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // like or unlike post
 
