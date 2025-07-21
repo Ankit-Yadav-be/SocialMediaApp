@@ -1,0 +1,28 @@
+import express from "express"
+import dotenv from "dotenv"
+import cors from "cors"
+import  dbConnect  from "./src/config/dbConnection.js"
+import authRoutes from "./src/routes/authRoutes.js"
+import userRoutes from "./src/routes/userRoutes.js"
+import postRoutes from "./src/routes/postRoutes.js"
+import notificationRoutes from "./src/routes/notificationRoutes.js"
+const app = express()
+
+dotenv.config();
+app.use(cors())
+app.use(express.json());
+
+dbConnect();
+
+app.get('/',(req,res)=>{
+   res.send("API Running...")
+})
+
+app.use("/api/auth", authRoutes)
+app.use("/api/users",userRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/notifications", notificationRoutes);
+
+
+export default app;
+
