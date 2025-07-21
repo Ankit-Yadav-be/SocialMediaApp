@@ -11,7 +11,7 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-import User from "../models/User.js";
+
 
 export const getAllUsersProfile = async (req, res) => {
   try {
