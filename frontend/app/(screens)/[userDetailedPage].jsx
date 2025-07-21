@@ -177,7 +177,7 @@ const UserDetailedPage = () => {
         {/* Posts */}
         <Text style={styles.sectionTitle}>Posts</Text>
         <View >
-          <PostById userDetailedPage={userDetailedPage}/>
+          <PostById userDetailedPage={userDetailedPage} />
         </View>
       </ScrollView>
     </SafeAreaView>

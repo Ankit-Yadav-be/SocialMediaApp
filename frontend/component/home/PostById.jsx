@@ -13,16 +13,18 @@ import { Avatar } from 'react-native-paper';
 import { AntDesign } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function PostById({ userDetailedPage }) {
+export default function PostById ({ userDetailedPage }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-
+ const token =  AsyncStorage.getItem('token');
   const fetchPosts = async () => {
     try {
       const res = await axios.get(
-        `https://social-media-app-six-nu.vercel.app/api/posts/getpost/${userDetailedPage}`
-      );
+        `https://social-media-app-six-nu.vercel.app/api/posts/getpost/${userDetailedPage}`,
+         {headers: { Authorization: `Bearer ${token}` }
+    });
       setPosts(res.data);
     } catch (err) {
       console.error('Error fetching posts:', err);
@@ -60,7 +62,7 @@ export default function PostById({ userDetailedPage }) {
 
 
           {/* Post Image */}
-         <TouchableOpacity onPress={()=>router.push(`/(postScreen)/${post._id}`)}>
+         <TouchableOpacity onPress={()=>router.push(`/(postscreen)/${post._id}`)}>
              {post.image && (
             <Image
               source={{ uri: post.image }}
