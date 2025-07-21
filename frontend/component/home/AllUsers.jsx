@@ -20,7 +20,7 @@ const AllUsers = () => {
   const fetchUserProfile = async () => {
     try {
       const res = await axios.get(
-        'https://social-media-app-six-nu.vercel.app/api/users/allUsers',
+        'https://social-media-app-six-nu.vercel.app/api/users/',
         
            { headers: { Authorization: `Bearer ${token}` },
         }
