@@ -15,7 +15,8 @@ export const getUserProfile = async (req, res) => {
 
 export const getAllUsersProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id.trim())
+    console.log(req.user._id)
+    const user = await User.findById(req.user._id)
       .select("-password")
       .populate("followers", "name profilePic")       // Optional: if you want followers' details
       .populate("following", "name profilePic");       // Optional: if you want following details
@@ -23,7 +24,7 @@ export const getAllUsersProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
+    console.log(user);
     res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching user profile:", error);
