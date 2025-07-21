@@ -8,6 +8,6 @@ router.post("/", protect, createPost);
 router.get("/feed", protect, getFeedPosts);
 router.put("/like/:id", protect, likeOrUnlikePost);
 router.put("/comment/:id", protect, addComment);
-
+router.get("/getpost/:id", getAllPosts);
 
 export default router;

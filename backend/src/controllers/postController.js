@@ -37,16 +37,15 @@ export const getFeedPosts = async (req, res) => {
 
     const posts = await Post.find({ user: { $in: allUsersToFetch } })
       .sort({ createdAt: -1 })
-      .populate("user", "name email profilePic")              // Post author
-      .populate("comments.user", "name email profilePic")     // Comment authors
-      .populate("likes", "name email profilePic");            // Users who liked the post
+      .populate("user", "name email profilePic") // Post author
+      .populate("comments.user", "name email profilePic") // Comment authors
+      .populate("likes", "name email profilePic"); // Users who liked the post
 
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 // like or unlike post
 
@@ -110,5 +109,24 @@ export const addComment = async (req, res) => {
     res.status(200).json(post);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// controllers/postController.js
+
+
+export const getAllPosts = async (req, res) => {
+  try {
+    const posts = await Post.findById(req.params.id)
+      .populate("user", "name email profilePic") // Populate post owner
+      .populate("likes", "name email profilePic") // Populate likes with user details
+      .populate("comments.user", "name email profilePic") // Populate commenters
+
+      .sort({ createdAt: -1 }); // Latest posts first
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ message: "Failed to fetch posts", error });
   }
 };

@@ -11,13 +11,14 @@ import {
 import { useAuth } from '../../context/authContext';
 import axios from 'axios';
 import { FontAwesome, Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const PostCard = ({ post, fetchFeed }) => {
   const [liked, setLiked] = useState(post.likes.includes(post.user._id));
   const [commentText, setCommentText] = useState('');
   const [showAllComments, setShowAllComments] = useState(false);
   const { token } = useAuth();
-
+  const router   = useRouter();
   const handleLike = async () => {
     try {
       await axios.put(
@@ -51,7 +52,9 @@ const PostCard = ({ post, fetchFeed }) => {
     <View style={styles.card}>
       {/* Header */}
       <View style={styles.header}>
-        <Image source={{ uri: post.user.profilePic }} style={styles.avatar} />
+       <TouchableOpacity onPress={()=>router.push(`/(screens)/${post.user._id}`)}>
+         <Image source={{ uri: post.user.profilePic }} style={styles.avatar} />
+       </TouchableOpacity>
         <View>
           <Text style={styles.username}>{post.user.name}</Text>
           <Text style={styles.dateText}>
