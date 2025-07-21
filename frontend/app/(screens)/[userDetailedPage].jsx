@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { decode as atob } from 'base-64'; // for decoding JWT
+import PostById from '../../component/home/PostById';
 
 const UserDetailedPage = () => {
   const [userData, setUserData] = useState(null);
@@ -176,7 +177,7 @@ const UserDetailedPage = () => {
         {/* Posts */}
         <Text style={styles.sectionTitle}>Posts</Text>
         <View style={styles.postsPlaceholder}>
-          <Text style={styles.emptyText}>no post..</Text>
+          <PostById userDetailedPage={userDetailedPage}/>
         </View>
       </ScrollView>
     </SafeAreaView>

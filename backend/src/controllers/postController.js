@@ -117,12 +117,11 @@ export const addComment = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.findById(req.params.id)
-      .populate("user", "name email profilePic") // Populate post owner
-      .populate("likes", "name email profilePic") // Populate likes with user details
-      .populate("comments.user", "name email profilePic") // Populate commenters
-
-      .sort({ createdAt: -1 }); // Latest posts first
+    const posts = await Post.find({ user: req.params.id }) // ✅ Find all posts of that user
+      .populate("user", "name email profilePic")
+      .populate("likes", "name email profilePic")
+      .populate("comments.user", "name email profilePic")
+      .sort({ createdAt: -1 }); // Latest first
 
     res.status(200).json(posts);
   } catch (error) {
