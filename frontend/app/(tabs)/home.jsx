@@ -9,11 +9,11 @@ import {
   StatusBar,
   
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PostCard from '../../component/home/PostCard';
-import UserProfile from '../../component/home/UserPofile';
+
 import AllUsers from '../../component/home/AllUsers';
 
 const HomeScreen = () => {

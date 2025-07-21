@@ -3,34 +3,36 @@ import {
   View,
   Text,
   Image,
-  FlatList,
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  Dimensions,
 } from 'react-native';
-
 import axios from 'axios';
 import { Avatar } from 'react-native-paper';
-import { AntDesign, Feather } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 
-export default function PostById({userDetailedPage}) {
-
-  const [post, setPost] = useState(null);
+export default function PostById({ userDetailedPage }) {
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchPost = async () => {
+  const fetchPosts = async () => {
     try {
-      const res = await axios.get(`https://social-media-app-six-nu.vercel.app/api/posts/getpost/${userDetailedPage}`);
-      setPost(res.data);
+      const res = await axios.get(
+        `https://social-media-app-six-nu.vercel.app/api/posts/getpost/${userDetailedPage}`
+      );
+      setPosts(res.data);
     } catch (err) {
-      console.error('Error fetching post:', err);
+      console.error('Error fetching posts:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPost();
+    fetchPosts();
   }, []);
 
   if (loading) {
@@ -41,80 +43,65 @@ export default function PostById({userDetailedPage}) {
     );
   }
 
+  if (!posts || posts.length === 0) {
+    return (
+      <View style={styles.loader}>
+        <Text style={{ color: '#555' }}>No posts found for this user.</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.card}>
-        {/* User Info */}
-        <View style={styles.userRow}>
-          <Avatar.Image
-            source={{ uri: post.user.profilePic }}
-            size={44}
-          />
-          <View style={styles.userDetails}>
-            <Text style={styles.userName}>{post.user.name}</Text>
-            <Text style={styles.postDate}>
-              {new Date(post.createdAt).toDateString()}
-            </Text>
-          </View>
+      {posts.map((post, index) => (
+        <View style={styles.card} key={post._id || index}>
+          {/* User Info */}
+          
+
+
+          {/* Post Image */}
+         <TouchableOpacity onPress={()=>router.push(`/(postScreen)/${post._id}`)}>
+             {post.image && (
+            <Image
+              source={{ uri: post.image }}
+              style={styles.postImage}
+              resizeMode="cover"
+            />
+          )}
+         </TouchableOpacity>
+
+         
+          {/* Comments */}
+        
         </View>
-
-        {/* Post Image */}
-        <Image
-          source={{ uri: post.image }}
-          style={styles.postImage}
-          resizeMode="cover"
-        />
-
-        {/* Caption */}
-        {post.caption ? (
-          <Text style={styles.caption}>{post.caption}</Text>
-        ) : null}
-
-        {/* Likes */}
-        <View style={styles.likesSection}>
-          <AntDesign name="heart" size={20} color="#e74c3c" />
-          <Text style={styles.likeCount}>{post.likes.length} Likes</Text>
-        </View>
-
-        {/* Comments */}
-        <View style={styles.commentSection}>
-          <Text style={styles.commentHeader}>Comments</Text>
-          {post.comments.map((comment, index) => (
-            <View style={styles.commentBox} key={index}>
-              <Avatar.Image
-                source={{ uri: comment.user.profilePic }}
-                size={32}
-              />
-              <View style={styles.commentTextWrapper}>
-                <Text style={styles.commentAuthor}>{comment.user.name}</Text>
-                <Text style={styles.commentText}>{comment.text}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
+      ))}
     </ScrollView>
   );
 }
+
+const screenWidth = Dimensions.get('window').width;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F6FA',
+    backgroundColor: '#F0F4F8',
   },
   loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   card: {
-    backgroundColor: '#fff',
-    margin: 16,
+    backgroundColor: '#ffffff',
+    margin: 12,
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
-    elevation: 4,
+    elevation: 3,
   },
   userRow: {
     flexDirection: 'row',
@@ -122,61 +109,77 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   userDetails: {
-    marginLeft: 10,
+    marginLeft: 12,
   },
   userName: {
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 16,
+    color: '#1A1A1A',
   },
   postDate: {
-    color: '#777',
+    color: '#888',
     fontSize: 12,
+    marginTop: 2,
   },
   postImage: {
     width: '100%',
-    height: 240,
+    height: screenWidth * 0.6,
     borderRadius: 12,
-    marginVertical: 10,
+    marginVertical: 12,
   },
   caption: {
     fontSize: 15,
-    marginBottom: 10,
+    fontStyle: 'italic',
     color: '#333',
+    marginBottom: 12,
   },
   likesSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   likeCount: {
-    marginLeft: 8,
+    marginLeft: 6,
     fontWeight: '500',
-    color: '#333',
+    fontSize: 14,
+    color: '#444',
   },
   commentSection: {
-    marginTop: 12,
+    marginTop: 14,
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    paddingTop: 10,
   },
   commentHeader: {
     fontWeight: '600',
     fontSize: 16,
-    marginBottom: 8,
     color: '#4A90E2',
+    marginBottom: 10,
   },
   commentBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-  commentTextWrapper: {
+  commentContent: {
+    backgroundColor: '#F5F7FA',
+    borderRadius: 10,
+    padding: 10,
     marginLeft: 10,
     flex: 1,
   },
   commentAuthor: {
     fontWeight: '600',
     fontSize: 14,
+    marginBottom: 2,
+    color: '#222',
   },
   commentText: {
     fontSize: 13,
     color: '#555',
+  },
+  noComment: {
+    color: '#999',
+    fontStyle: 'italic',
   },
 });

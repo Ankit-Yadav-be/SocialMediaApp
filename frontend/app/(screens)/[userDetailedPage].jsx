@@ -176,7 +176,7 @@ const UserDetailedPage = () => {
 
         {/* Posts */}
         <Text style={styles.sectionTitle}>Posts</Text>
-        <View style={styles.postsPlaceholder}>
+        <View >
           <PostById userDetailedPage={userDetailedPage}/>
         </View>
       </ScrollView>
