@@ -32,8 +32,8 @@ export const createPost = async (req, res) => {
 export const getFeedPosts = async (req, res) => {
   try {
     // 1. Get current user and followed users
+    console.log(req.user._id);
     const currentUser = await User.findById(req.user._id);
-
     const followedUsers = currentUser.following;
 
     // 2. Include own posts as well
@@ -89,7 +89,7 @@ export const likeOrUnlikePost = async (req, res) => {
 export const addComment = async (req, res) => {
   try {
     const { text } = req.body;
-      const postId = req.params.id;
+    const postId = req.params.id;
     const post = await Post.findById(req.params.id);
 
     if (!post) return res.status(404).json({ message: "Post not found" });
@@ -99,14 +99,14 @@ export const addComment = async (req, res) => {
       text,
       createdAt: new Date(),
     };
-   const userId = req.user._id;
+    const userId = req.user._id;
     post.comments.push(newComment);
     await createNotification({
-        recipient: post.user,
-        sender: userId,
-        type: "comment",
-        post: postId,
-      });
+      recipient: post.user,
+      sender: userId,
+      type: "comment",
+      post: postId,
+    });
 
     await post.save();
     res.status(200).json(post);

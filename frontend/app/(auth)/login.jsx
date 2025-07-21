@@ -29,7 +29,7 @@ const handleLogin = async () => {
   try {
     setLoading(true);
 
-    const res = await axios.post('https://social-media-app-six-nu.vercel.app/api/auth/login', {
+    const res = await axios.post('https://social-media-app-six-nu.vercel.app//api/auth/login', {
       email,
       password,
     });
@@ -40,6 +40,7 @@ const handleLogin = async () => {
     await AsyncStorage.setItem('user', JSON.stringify(user));
 
     router.replace('/home');
+    console.log("Login Successfull..")
   } catch (err) {
     console.error('Login error:', err.response?.data || err.message);
     Alert.alert('Login Failed', err.response?.data?.message || 'Something went wrong');
