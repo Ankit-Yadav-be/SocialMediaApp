@@ -9,8 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import axios from 'axios';
-import { Avatar } from 'react-native-paper';
-import { AntDesign } from '@expo/vector-icons';
+
 import { TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -73,7 +72,7 @@ export default function PostById ({ userDetailedPage }) {
          </TouchableOpacity>
 
          
-          {/* Comments */}
+         
         
         </View>
       ))}
@@ -86,7 +85,7 @@ const screenWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F4F8',
+    backgroundColor: '#121416ff',
   },
   loader: {
     flex: 1,
@@ -95,11 +94,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
-    backgroundColor: '#ffffff',
-    margin: 12,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
+    backgroundColor: '#0b0a0af1',
+    margin: 5,
+    borderRadius: 10,
+    padding: 10,
+    shadowColor: '#fff',
     shadowOpacity: 0.06,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
@@ -124,8 +123,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   postImage: {
-    width: '100%',
-    height: screenWidth * 0.6,
+    width: '50%',
+    height: screenWidth * 0.3,
     borderRadius: 12,
     marginVertical: 12,
   },

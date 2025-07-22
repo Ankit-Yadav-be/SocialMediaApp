@@ -14,12 +14,14 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+
 export default function AllUsers() {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
   const fetchAllUsers = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -49,7 +51,7 @@ export default function AllUsers() {
   const handleSearch = (text) => {
     setSearchQuery(text);
     if (text.trim() === '') {
-      setFilteredUsers([]); // Don't show anything when empty
+      setFilteredUsers([]);
       return;
     }
 
@@ -59,10 +61,8 @@ export default function AllUsers() {
     setFilteredUsers(filtered);
   };
 
-  
-
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() =>router.push(`/(screens)/${item._id}`)}>
+    <TouchableOpacity style={styles.card} onPress={() => router.push(`/(screens)/${item._id}`)}>
       <Image
         source={{
           uri: item.profilePic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
@@ -72,7 +72,7 @@ export default function AllUsers() {
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name}</Text>
         <View style={styles.followRow}>
-          <Ionicons name="people" size={16} color="#777" />
+          <Ionicons name="people" size={16} color="#aaa" />
           <Text style={styles.followText}>
             {'  '}
             {item.followers?.length || 0} Followers · {item.following?.length || 0} Following
@@ -84,22 +84,20 @@ export default function AllUsers() {
 
   return (
     <SafeAreaView style={styles.container}>
-
-
       {/* 🔍 Search Bar */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+        <Ionicons name="search" size={20} color="#bbb" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search users by name"
           value={searchQuery}
           onChangeText={handleSearch}
-          placeholderTextColor="#999"
+          placeholderTextColor="#888"
         />
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#333" style={{ marginTop: 50 }} />
+        <ActivityIndicator size="large" color="#999" style={{ marginTop: 50 }} />
       ) : searchQuery.trim() === '' ? (
         null
       ) : filteredUsers.length === 0 ? (
@@ -122,29 +120,17 @@ export default function AllUsers() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f6fc',
-  },
-  header: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginVertical: 20,
-    textAlign: 'center',
-    color: '#1f2937',
+    backgroundColor: '#1e1e2f',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e2f',
     marginHorizontal: 16,
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    marginBottom: 12,
   },
   searchIcon: {
     marginRight: 8,
@@ -152,7 +138,8 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: '#f0f0f0',
+    fontFamily: 'Outfit-Regular',
   },
   list: {
     paddingHorizontal: 16,
@@ -160,15 +147,11 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#1c1c2c',
     marginBottom: 14,
     padding: 14,
     borderRadius: 16,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    elevation: 2,
     alignItems: 'center',
   },
   avatar: {
@@ -176,7 +159,7 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     marginRight: 14,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#2a2a2a',
   },
   infoContainer: {
     flex: 1,
@@ -184,8 +167,8 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#222',
+    fontFamily: 'Outfit-Bold',
+    color: '#ffffff',
     marginBottom: 6,
   },
   followRow: {
@@ -194,7 +177,8 @@ const styles = StyleSheet.create({
   },
   followText: {
     fontSize: 13,
-    color: '#666',
+    color: '#ccc',
+    fontFamily: 'Outfit-Regular',
   },
   infoBox: {
     alignItems: 'center',
@@ -202,6 +186,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 16,
-    color: '#777',
+    color: '#aaa',
+    fontFamily: 'Outfit-Regular',
   },
 });

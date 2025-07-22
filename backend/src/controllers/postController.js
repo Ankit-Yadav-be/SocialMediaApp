@@ -1,5 +1,4 @@
 import Post from "../models/postModel.js";
-import cloudinary from "../utils/cloudinary.js";
 import User from "../models/userModel.js";
 import dotenv from "dotenv";
 import createNotification from "../utils/notification.js";
@@ -12,13 +11,9 @@ export const createPost = async (req, res) => {
   try {
     if (!image) return res.status(400).json({ message: "Image is required" });
 
-    const uploadedImage = await cloudinary.uploader.upload(image, {
-      folder: "posts",
-    });
-
     const newPost = await Post.create({
       user: req.user._id,
-      image: uploadedImage.secure_url,
+      image: image,
       caption,
     });
 
@@ -114,7 +109,6 @@ export const addComment = async (req, res) => {
 
 // controllers/postController.js
 
-
 export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find({ user: req.params.id }) // ✅ Find all posts of that user
@@ -132,7 +126,7 @@ export const getAllPosts = async (req, res) => {
 
 export const getAllPostsByPostId = async (req, res) => {
   try {
-    const posts = await Post.findById(req.params.id) 
+    const posts = await Post.findById(req.params.id)
       .populate("user", "name email profilePic")
       .populate("likes", "name email profilePic")
       .populate("comments.user", "name email profilePic")

@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { decode as atob } from 'base-64'; // for decoding JWT
+import { decode as atob } from 'base-64';
 import PostById from '../../component/home/PostById';
 
 const UserDetailedPage = () => {
@@ -59,7 +59,7 @@ const UserDetailedPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setIsFollowing(!isFollowing);
-      fetchUserProfile(); // refresh followers count
+      fetchUserProfile();
     } catch (error) {
       console.error('Error toggling follow:', error?.response?.data || error.message);
     }
@@ -82,69 +82,76 @@ const UserDetailedPage = () => {
   if (loading || !userData) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#6ab0ff" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F4F6F9' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0e0e0e' }}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <Image
+        <LinearGradient colors={['#1a1a1a', '#121212']} style={styles.profileCard}>
+         
+          <View style={styles.infoSection}>
+             <Image
             source={{ uri: userData.profilePic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}
             style={styles.mainAvatar}
           />
-          <Text style={styles.mainName}>{userData.name}</Text>
-          <Text style={styles.email}>{userData.email}</Text>
-          {userData.bio && <Text style={styles.bio}>{userData.bio}</Text>}
+            <View style={styles.infoSection2}>
+            <View style={styles.infoSection3}>
+                <Text style={styles.mainName}>{userData.name}</Text>
+            <Text style={styles.email}>{userData.email}</Text>
+            {userData.bio && <Text style={styles.bio}>{userData.bio}</Text>}
+            </View>
 
-          {/* Follow/Unfollow Button */}
-          {currentUserId !== userData._id && (
-            <TouchableOpacity
-              onPress={handleFollowToggle}
-              style={{
-                backgroundColor: isFollowing ? '#E3E3E3' : '#4A90E2',
-                paddingVertical: 10,
-                paddingHorizontal: 28,
-                borderRadius: 25,
-                marginTop: 15,
-              }}
-            >
-              <Text
-                style={{
-                  color: isFollowing ? '#333' : '#fff',
-                  fontFamily: 'Outfit-Bold',
-                  fontSize: 16,
-                }}
+           <View style={styles.editbutton}>
+             {currentUserId !== userData._id && (
+              <LinearGradient
+                colors={['rgba(37, 29, 29, 0.9)', 'rgba(41, 31, 31, 0.89)']}
+                style={styles.followWrapper}
               >
-                {isFollowing ? 'Unfollow' : 'Follow'}
-              </Text>
-            </TouchableOpacity>
-          )}
+                <TouchableOpacity
+                  style={styles.followBtn}
+                >
+                  <Text style={styles.followBtnText}>
+                    Edit
+                  </Text>
+                </TouchableOpacity>
+              </LinearGradient>
+              
+            )}
+             <LinearGradient
+                colors={['rgba(37, 29, 29, 0.9)', 'rgba(41, 31, 31, 0.89)']}
+                style={styles.followWrapper}
+              >
+                <TouchableOpacity
+                  onPress={handleFollowToggle}
+                  style={styles.followBtn}
+                >
+                  <Text style={styles.followBtnText}>
+                    {isFollowing ? 'Unfollow' : 'Follow'}
+                  </Text>
+                </TouchableOpacity>
+              </LinearGradient>
+           </View>
+            </View>
+          </View>
 
-          {/* Stats */}
           <View style={styles.statsContainer}>
-            <LinearGradient colors={['#E0ECFF', '#F4F9FF']} style={styles.statBoxEnhanced}>
-              <View style={styles.iconWrapper}>
-                <Ionicons name="people" size={24} color="#4A90E2" />
-              </View>
-              <Text style={styles.statNumberEnhanced}>{userData.followers?.length || 0}</Text>
-              <Text style={styles.statLabelEnhanced}>Followers</Text>
+            <LinearGradient colors={['#1e1e2e', '#121212']} style={styles.statBox}>
+              <Ionicons name="people" size={22} color="#6ab0ff" />
+              <Text style={styles.statNumber}>{userData.followers?.length || 0}</Text>
+              <Text style={styles.statLabel}>Followers</Text>
             </LinearGradient>
 
-            <LinearGradient colors={['#E0ECFF', '#F4F9FF']} style={styles.statBoxEnhanced}>
-              <View style={styles.iconWrapper}>
-                <Ionicons name="person-add" size={24} color="#4A90E2" />
-              </View>
-              <Text style={styles.statNumberEnhanced}>{userData.following?.length || 0}</Text>
-              <Text style={styles.statLabelEnhanced}>Following</Text>
+            <LinearGradient colors={['#1e1e2e', '#121212']} style={styles.statBox}>
+              <Ionicons name="person-add" size={22} color="#6ab0ff" />
+              <Text style={styles.statNumber}>{userData.following?.length || 0}</Text>
+              <Text style={styles.statLabel}>Following</Text>
             </LinearGradient>
           </View>
-        </View>
+        </LinearGradient>
 
-        {/* Followers */}
         <Text style={styles.sectionTitle}>Followers</Text>
         {userData.followers?.length ? (
           <FlatList
@@ -159,7 +166,6 @@ const UserDetailedPage = () => {
           <Text style={styles.emptyText}>No followers yet</Text>
         )}
 
-        {/* Following */}
         <Text style={styles.sectionTitle}>Following</Text>
         {userData.following?.length ? (
           <FlatList
@@ -174,151 +180,169 @@ const UserDetailedPage = () => {
           <Text style={styles.emptyText}>Not following anyone</Text>
         )}
 
-        {/* Posts */}
         <Text style={styles.sectionTitle}>Posts</Text>
-        <View >
-          <PostById userDetailedPage={userDetailedPage} />
-        </View>
+        <PostById userDetailedPage={userDetailedPage} />
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  editbutton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    gap:5,
+  },
+  infoSection: {
+    flex: 1,
+    flexDirection: 'row',
+    margin: 7,
+    paddingLeft: 0,
+  },
+  infoSection2: {
+    flex: 1,
+    flexDirection: 'column',
+    margin: 8,
+  },
+  infoSection3: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
   container: {
-    padding: 20,
-    paddingBottom: 50,
+    paddingTop: 20,
+    padding:8,
+    paddingBottom: 40,
   },
   center: {
     flex: 1,
+    flexDirection: 'column',
+    backgroundColor: '#0e0e0e',
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileCard: {
-    backgroundColor: '#fff',
     borderRadius: 20,
-    padding: 25,
-    shadowColor: '#fff',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 4,
+    paddingTop: 8,
     marginBottom: 30,
     alignItems: 'center',
+    shadowColor: '#6ab0ff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
   },
   mainAvatar: {
-    width: 110,
-    height: 110,
+    width: 100,
+    height: 100,
     borderRadius: 55,
     marginBottom: 15,
     borderWidth: 2,
-    borderColor: '#4A90E2',
+    borderColor: '#ffffffff',
   },
   mainName: {
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: 'Outfit-Bold',
-    color: '#222',
+    color: '#ffffff',
   },
   email: {
-    fontSize: 15,
-    color: '#777',
+    fontSize: 14,
+    color: '#aaa',
     fontFamily: 'Outfit-Regular',
     marginTop: 4,
   },
   bio: {
     fontSize: 14,
-    color: '#555',
-    fontStyle: 'italic',
+    color: '#bbb',
     fontFamily: 'Outfit-Regular',
+    fontStyle: 'italic',
     textAlign: 'center',
     marginTop: 10,
+  },
+  followWrapper: {
+    padding: 2,
+    borderRadius: 20,
+  },
+  followBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 20, // Constant padding
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 100, // Minimum width for equal sizing
+    alignSelf: 'flex-start', // Prevent stretching
+  },
+  followBtnText: {
+    color: '#fff',
+    fontFamily: 'Outfit-Bold',
+    fontSize: 15,
+    textAlign: 'center',
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: 25,
   },
-  statBoxEnhanced: {
+  statBox: {
     alignItems: 'center',
-    backgroundColor: '#F5F9FF',
-    padding: 18,
-    borderRadius: 20,
+    padding: 16,
+    borderRadius: 14,
     width: 130,
-    elevation: 5,
-    shadowColor: '#ffffff1c',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
     marginHorizontal: 5,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
-  iconWrapper: {
-    backgroundColor: '#D6E7FF',
-    paddingTop: 5,
-    borderRadius: 50,
-    marginBottom: 5,
-  },
-  statNumberEnhanced: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+  statNumber: {
+    fontSize: 20,
     fontFamily: 'Outfit-Bold',
-  },
-  statLabelEnhanced: {
-    fontSize: 15,
-    color: '#555',
-    fontFamily: 'Outfit-Regular',
+    color: '#fff',
     marginTop: 4,
   },
+  statLabel: {
+    fontSize: 14,
+    color: '#aaa',
+    fontFamily: 'Outfit-Regular',
+    marginTop: 2,
+  },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: 'Outfit-Bold',
-    marginBottom: 12,
-    paddingLeft: 10,
-    margin: 10,
-    color: '#222',
+    marginBottom: 5,
+    margin:10,
+    marginLeft: 10,
+    color: '#fff',
   },
   userCard: {
     alignItems: 'center',
     marginRight: 15,
-    backgroundColor: '#fff',
+    backgroundColor: '#1f1f1f',
     padding: 10,
     borderRadius: 10,
     width: 90,
-    elevation: 2,
-    shadowColor: '#aaa',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
   },
   avatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#333',
   },
   name: {
     marginTop: 6,
     fontSize: 13,
     textAlign: 'center',
     fontFamily: 'Outfit-Regular',
-    color: '#333',
+    color: '#eee',
   },
   emptyText: {
     fontSize: 14,
     color: '#888',
     textAlign: 'center',
-    fontStyle: 'italic',
     fontFamily: 'Outfit-Regular',
     marginBottom: 15,
   },
-  postsPlaceholder: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#eee',
-    alignItems: 'center',
-  },
 });
+
 
 export default UserDetailedPage;

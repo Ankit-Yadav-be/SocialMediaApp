@@ -7,7 +7,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   StatusBar,
-  
+
 } from 'react-native';
 
 import axios from 'axios';
@@ -52,9 +52,9 @@ const HomeScreen = () => {
   };
 
   return (
- 
-     <View style={styles.container}>
-      <StatusBar backgroundColor="#f4f6f8" barStyle="dark-content" />
+
+    <View style={styles.container}>
+      <StatusBar backgroundColor="#112130ff" barStyle="dark-content" />
       {loading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#4A90E2" />
@@ -74,8 +74,8 @@ const HomeScreen = () => {
           }
           contentContainerStyle={styles.scrollContent}
         >
-           {/* <UserProfile/> */}
-           <AllUsers/>
+          {/* <UserProfile/> */}
+          <AllUsers />
 
           {posts.map((post) => (
             <PostCard key={post._id} post={post} />
@@ -83,7 +83,7 @@ const HomeScreen = () => {
         </ScrollView>
       )}
     </View>
-  
+
   );
 };
 
@@ -92,7 +92,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f6f8', // soft light gray background
+    backgroundColor: '#0c132bff', // soft light gray background
     paddingTop: 10,
   },
   scrollContent: {
