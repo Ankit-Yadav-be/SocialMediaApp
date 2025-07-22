@@ -7,6 +7,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Modal,
+  Pressable,
 } from 'react-native';
 import axios from 'axios';
 import { FontAwesome, Feather } from '@expo/vector-icons';
@@ -17,6 +19,8 @@ const PostCard = ({ post, fetchFeed }) => {
   const [liked, setLiked] = useState(post.likes.includes(post.user._id));
   const [commentText, setCommentText] = useState('');
   const [showAllComments, setShowAllComments] = useState(false);
+  const [shareText, setShareText] = useState('');
+  const [shareModalVisible, setShareModalVisible] = useState(false);
 
   const router = useRouter();
 
@@ -32,6 +36,23 @@ const PostCard = ({ post, fetchFeed }) => {
       fetchFeed();
     } catch (err) {
       console.log('Error liking post', err.message);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!shareText.trim()) return;
+    try {
+      const token = await AsyncStorage.getItem("token");
+      await axios.post(
+        `https://social-media-app-six-nu.vercel.app/api/posts/share/${post._id}`,
+        { shareText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setShareText('');
+      setShareModalVisible(false);
+      fetchFeed();
+    } catch (err) {
+      console.log('Error sharing post', err.message);
     }
   };
 
@@ -58,12 +79,21 @@ const PostCard = ({ post, fetchFeed }) => {
         <TouchableOpacity onPress={() => router.push(`/(screens)/${post.user._id}`)}>
           <Image source={{ uri: post.user.profilePic }} style={styles.avatar} />
         </TouchableOpacity>
-        <View>
+
+        <View style={{ flex: 1 }}>
           <Text style={styles.username}>{post.user.name}</Text>
           <Text style={styles.dateText}>
             {new Date(post.createdAt).toDateString()}
           </Text>
         </View>
+
+        {/* Share Icon */}
+        <TouchableOpacity
+          onPress={() => setShareModalVisible(true)}
+          style={styles.shareIcon}
+        >
+          <Feather name="share-2" size={22} color="#ccc" />
+        </TouchableOpacity>
       </View>
 
       {/* Post Image */}
@@ -119,9 +149,7 @@ const PostCard = ({ post, fetchFeed }) => {
               <View key={i} style={styles.commentItem}>
                 <TouchableOpacity onPress={() => { router.push(`/(screens)/${c.user._id}`) }}>
                   <Image
-                    source={{
-                      uri: c.user?.profilePic || 'https://i.pravatar.cc/300',
-                    }}
+                    source={{ uri: c.user?.profilePic || 'https://i.pravatar.cc/300' }}
                     style={styles.commentAvatar}
                   />
                 </TouchableOpacity>
@@ -136,6 +164,36 @@ const PostCard = ({ post, fetchFeed }) => {
           </ScrollView>
         </View>
       )}
+
+      {/* Share Modal */}
+      <Modal
+        animationType="slide"
+        transparent
+        visible={shareModalVisible}
+        onRequestClose={() => setShareModalVisible(false)}
+      >
+        <View style={modalStyles.modalBackground}>
+          <View style={modalStyles.modalContainer}>
+            <Text style={modalStyles.modalTitle}>Add a message to share</Text>
+            <TextInput
+              value={shareText}
+              onChangeText={setShareText}
+              placeholder="What's on your mind?"
+              placeholderTextColor="#888"
+              style={modalStyles.modalInput}
+              multiline
+            />
+            <View style={modalStyles.modalButtons}>
+              <Pressable onPress={() => setShareModalVisible(false)} style={modalStyles.cancelButton}>
+                <Text style={modalStyles.buttonText}>Cancel</Text>
+              </Pressable>
+              <TouchableOpacity onPress={handleShare} style={modalStyles.sendButton}>
+                <Text style={modalStyles.buttonText}>Send</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -257,5 +315,65 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: 'Outfit-Bold',
     color: '#ffffff',
+  },
+  shareIcon: {
+    padding: 6,
+    backgroundColor: '#1f1f24ff',
+    borderRadius: 8,
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#1c1c1e',
+    width: '85%',
+    borderRadius: 14,
+    padding: 20,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#888',
+  },
+  modalTitle: {
+    fontSize: 16,
+    color: '#fff',
+    fontFamily: 'Outfit-Bold',
+    marginBottom: 12,
+  },
+  modalInput: {
+    backgroundColor: '#2a2a2d',
+    color: '#fff',
+    fontFamily: 'Outfit-Regular',
+    padding: 10,
+    borderRadius: 10,
+    fontSize: 14,
+    marginBottom: 16,
+    minHeight: 80,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  cancelButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginRight: 10,
+    backgroundColor: '#444',
+    borderRadius: 6,
+  },
+  sendButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#4f46e5',
+    borderRadius: 6,
+  },
+  buttonText: {
+    color: '#fff',
+    fontFamily: 'Outfit-Bold',
   },
 });
