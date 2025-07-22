@@ -15,7 +15,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: isDark ? "#fff" : "#000",
         tabBarInactiveTintColor: isDark ? "#aaa" : "#888",
         tabBarStyle: {
-          backgroundColor: isDark ? "#11182fff" : "#fff",
+          backgroundColor: isDark ? "#121212" : "#fff",
           borderTopWidth: 1,
           elevation: 10,
           height: 65,
@@ -28,7 +28,7 @@ export default function TabLayout() {
         name="home"
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" color={color} size={size} />
+            <Ionicons name="home-outline" color={'#fff'}  size={25} />
           ),
         }}
       />
@@ -36,7 +36,7 @@ export default function TabLayout() {
         name="create"
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle-outline" color={color} size={size + 4} />
+            <Ionicons name="add-circle-outline" color={'#fff'} size={30} />
           ),
         }}
       />
@@ -44,7 +44,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" color={color} size={size} />
+            <Ionicons name="person-outline" color={'#fff'}  size={25} />
           ),
         }}
       />

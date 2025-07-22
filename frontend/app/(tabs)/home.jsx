@@ -76,7 +76,7 @@ const HomeScreen = () => {
         >
           {/* <UserProfile/> */}
           <AllUsers />
-
+          <Text style={{color:"#fff", marginLeft:"17",fontFamily:"Outfit-Bold", fontSize:18}}>Your Feed</Text>
           {posts.map((post) => (
             <PostCard key={post._id} post={post} />
           ))}
@@ -92,7 +92,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0c132bff', // soft light gray background
+    backgroundColor: '#121212', // soft light gray background
     paddingTop: 10,
   },
   scrollContent: {

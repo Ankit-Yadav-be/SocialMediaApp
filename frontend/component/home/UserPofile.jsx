@@ -1,43 +1,61 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
-  FlatList,
   StyleSheet,
+  Image,
   ActivityIndicator,
   ScrollView,
-} from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+  TouchableOpacity,
+  Alert,
+  SafeAreaView,
+  FlatList,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { Ionicons, Feather } from "@expo/vector-icons";
+import { useLogout } from "./../../utils/logout";
+import { router } from "expo-router";
 
-const AllUsers = () => {
-  const [userData, setUserData] = useState(null);
+export default function UserProfileScreen() {
+  const [user, setUser] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
+  
+  const logout = useLogout();
+
+   const fetchPosts = async (userId) => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const res = await axios.get(
+      `https://social-media-app-six-nu.vercel.app/api/posts/getpost/${userId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setPosts(Array.isArray(res.data) ? res.data : []);
+  } catch (err) {
+    console.error('Error fetching posts:', err);
+    setPosts([]); // fallback
+  }
+};
 
   const fetchUserProfile = async () => {
     try {
-      const storedToken = await AsyncStorage.getItem('token');
-
-      if (!storedToken) {
-        console.error('No token found in storage');
-        return;
-      }
-
-      const res = await axios.get(
-        'https://social-media-app-six-nu.vercel.app/api/users/',
+      const token = await AsyncStorage.getItem("token");
+      const { data } = await axios.get(
+        "https://social-media-app-six-nu.vercel.app/api/users",
         {
           headers: {
-            Authorization: `Bearer ${storedToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      setUserData(res.data);
+      setUser(data);
+     fetchPosts(data?._id)
+     
     } catch (error) {
-      console.error('Error fetching profile:', error.response?.data || error.message);
+      console.error("Error fetching profile", error);
     } finally {
       setLoading(false);
     }
@@ -47,173 +65,323 @@ const AllUsers = () => {
     fetchUserProfile();
   }, []);
 
-  const renderFollower = ({ item }) => {
-    if (!item) return null;
-
+  if (loading) {
     return (
-      <View style={styles.followerContainer}>
-        <Image
-          source={{
-            uri: item.profilePic || 'https://via.placeholder.com/60',
-          }}
-          style={styles.avatar}
-        />
-        <Text style={styles.name}>{item.name || 'No Name'}</Text>
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#2c343eff" />
       </View>
-    );
-  };
-
-  if (loading || !userData) {
-    return (
-      <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9F9F9' }}>
+    <SafeAreaView style={styles.safeContainer}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>My Profile</Text>
-
-        <Image
-          source={{
-            uri: userData.profilePic || 'https://via.placeholder.com/120',
-          }}
-          style={styles.mainAvatar}
-        />
-        <Text style={styles.mainName}>{userData.name || 'No Name'}</Text>
-        <Text style={styles.email}>{userData.email || 'No Email'}</Text>
-
-        <View style={styles.statsContainer}>
-          <View style={styles.statBox}>
-            <FontAwesome5 name="users" size={18} color="#4A90E2" />
-            <Text style={styles.statNumber}>{userData.followers?.length || 0}</Text>
-            <Text style={styles.statLabel}>Followers</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.avatarContainer}>
+            <Image source={{ uri: user.profilePic }} style={styles.avatar} />
+             <View>
+               <TouchableOpacity
+              style={styles.editBtnIcon}
+              onPress={() =>
+                Alert.alert("Coming Soon", "Edit Profile Feature")
+              }
+            >
+              <Feather name="edit" size={16} color="#2e23e" />
+            </TouchableOpacity>
+             </View>
           </View>
-          <View style={styles.statBox}>
-            <MaterialIcons name="person-add" size={20} color="#4A90E2" />
-            <Text style={styles.statNumber}>{userData.following?.length || 0}</Text>
-            <Text style={styles.statLabel}>Following</Text>
-          </View>
+
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.bio}>{user.bio || "No bio added yet."}</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Followers</Text>
-        <FlatList
-          data={userData.followers || []}
-          keyExtractor={(item) => item._id}
-          renderItem={renderFollower}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        />
+        {/* Stats */}
+        <View style={styles.statsContainer}>
+          <TouchableOpacity
+            style={styles.statBox}
+            onPress={() => setShowFollowers(!showFollowers)}
+          >
+            <Text style={styles.statNumber}>{user.followers.length}</Text>
+            <Text style={styles.statLabel}>Followers</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.statBox}
+            onPress={() => setShowFollowing(!showFollowing)}
+          >
+            <Text style={styles.statNumber}>{user.following.length}</Text>
+            <Text style={styles.statLabel}>Following</Text>
+          </TouchableOpacity>
+        </View>
 
-        <Text style={styles.sectionTitle}>Following</Text>
-        <FlatList
-          data={userData.following || []}
-          keyExtractor={(item) => item._id}
-          renderItem={renderFollower}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        />
+        {/* Followers */}
+        {showFollowers && user.followers.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Followers</Text>
+            <FlatList
+              horizontal
+              data={user.followers}
+              keyExtractor={(item) => item._id}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <View style={styles.followerItem}>
+                 <TouchableOpacity onPress={()=>{router.push(`/(screens)/${item._id}`)}}>
+                   <Image
+                    source={{ uri: item.profilePic }}
+                    style={styles.followerAvatar}
+                  />
+                 </TouchableOpacity>
+                  <Text style={styles.followerName}>
+                    {item.name.length > 8
+                      ? item.name.slice(0, 8) + "…"
+                      : item.name}
+                  </Text>
+                </View>
+              )}
+            />
+          </View>
+        )}
+
+        {/* Following */}
+        {showFollowing && user.following.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Following</Text>
+            <FlatList
+              horizontal
+              data={user.following}
+              keyExtractor={(item) => item._id}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <View style={styles.followerItem}>
+                  <TouchableOpacity onPress={()=>{router.push(`/(screens)/${item._id}`)}}>
+                    <Image
+                    source={{ uri: item.profilePic }}
+                    style={styles.followerAvatar}
+                  />
+                  </TouchableOpacity>
+                  <Text style={styles.followerName}>
+                    {item.name.length > 8
+                      ? item.name.slice(0, 8) + "…"
+                      : item.name}
+                  </Text>
+                </View>
+              )}
+            />
+          </View>
+        )}
+
+        {/* Account Details */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account Details</Text>
+
+          <View style={styles.detailItem}>
+            <View style={styles.iconWrapper}>
+              <Feather name="mail" size={16} color="#1a1a1a" />
+            </View>
+            <Text style={styles.detailText}>{user.email}</Text>
+          </View>
+
+          <View style={styles.detailItem}>
+            <View style={styles.iconWrapper}>
+              <Feather name="calendar" size={16} color="#1a1a1a" />
+            </View>
+            <Text style={styles.detailText}>
+              Joined: {new Date(user.createdAt).toDateString()}
+            </Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.logoutBtnIcon} onPress={logout}>
+              <Ionicons name="log-out-outline" size={16} color="#2e23e" />
+            </TouchableOpacity>
+          </View>
+          {/* User Posts */}
+<View style={styles.section}>
+  <Text style={styles.sectionTitle}>Posts</Text>
+  {posts.length === 0 ? (
+    <Text style={{ color: "#999", textAlign: "center" }}>No posts yet.</Text>
+  ) : (
+    <FlatList
+      data={posts}
+      keyExtractor={(item) => item._id}
+      numColumns={2}
+      columnWrapperStyle={{ justifyContent: "space-between" }}
+      scrollEnabled={false}
+      renderItem={({ item }) => (
+        <View style={styles.gridItem}>
+          <TouchableOpacity onPress={()=>router.push(`/(postscreen)/${item._id}`)}>
+            <Image source={{ uri: item.image }} style={styles.gridImage} />
+          </TouchableOpacity>
+          <Text style={styles.gridCaption}>
+            {item.caption.length > 50
+              ? `${item.caption.slice(0, 50)}...`
+              : item.caption}
+          </Text>
+        </View>
+      )}
+    />
+  )}
+</View>
+
+
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
-};
-
+}
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "#121212",
+    paddingTop:40
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#121212",
+  },
   container: {
-    padding: 20,
+    padding: 0,
     paddingBottom: 40,
   },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: 15,
+    alignItems: "center",
+    marginBottom: 30,
   },
-  mainAvatar: {
+  avatarContainer: {
+    position: "relative",
+    marginBottom: 12,
+  },
+  avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    alignSelf: 'center',
-    marginVertical: 10,
-    borderWidth: 3,
-    borderColor: '#4A90E2',
+    borderWidth: 2,
+    borderColor: "#fbfdffff",
   },
-  mainName: {
+  editBtnIcon: {
+    position: "absolute",
+    right: -0,
+    top: -30,
+    backgroundColor: "#ffffffff",
+    padding: 10,
+    borderRadius: 10,
+    elevation: 4,
+  },
+  logoutBtnIcon: {
+    position: "absolute",
+    right: -0,
+    bottom: 100,
+    backgroundColor: "#ffffffff",
+    padding: 10,
+    borderRadius: 10,
+    elevation: 4,
+  },
+  name: {
     fontSize: 22,
-    fontWeight: '700',
-    textAlign: 'center',
-    color: '#1a1a1a',
+    fontWeight: "bold",
+    color: "#ffffff",
   },
-  email: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
+  bio: {
+    fontSize: 14,
+    color: "#aaa",
+    marginTop: 4,
+    textAlign: "center",
   },
   statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginVertical: 20,
-    paddingHorizontal: 10,
   },
   statBox: {
-    alignItems: 'center',
-    backgroundColor: '#E8F0FE',
-    padding: 12,
-    borderRadius: 12,
-    width: 130,
+    alignItems: "center",
   },
   statNumber: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 5,
-    color: '#4A90E2',
+    fontWeight: "bold",
+    color: "#fff",
   },
   statLabel: {
     fontSize: 14,
-    color: '#333',
-    marginTop: 2,
+    color: "#888",
+  },
+  section: {
+    backgroundColor: "#1e1e1e",
+    padding: 10,
+    borderRadius: 12,
+    marginTop: 10,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginTop: 20,
-    marginBottom: 10,
-    color: '#333',
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#ccc",
   },
-  followerContainer: {
-    alignItems: 'center',
-    marginRight: 15,
-    backgroundColor: '#fff',
-    padding: 10,
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  iconWrapper: {
+    backgroundColor: "#e0e0e0",
+    padding: 8,
     borderRadius: 10,
-    elevation: 3,
-    shadowColor: '#ccc',
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 1, height: 2 },
-    shadowRadius: 3,
+    marginRight: 12,
   },
-  avatar: {
+  detailText: {
+    fontSize: 14,
+    color: "#ccc",
+  },
+  followerItem: {
+    alignItems: "center",
+    marginRight: 12,
+  },
+  followerAvatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
+    borderWidth: 1,
+    borderColor: "#fbfdffff",
+    marginBottom: 6,
   },
-  name: {
-    marginTop: 6,
-    fontSize: 14,
-    maxWidth: 80,
-    textAlign: 'center',
-    color: '#444',
-    fontWeight: '500',
+  followerName: {
+    fontSize: 12,
+    color: "#ccc",
+    textAlign: "center",
   },
-});
+  postCard: {
+  backgroundColor: "#2c2c2c",
+  borderRadius: 10,
+  marginBottom: 16,
+  overflow: "hidden",
+  borderColor: "#444",
+  borderWidth: 1,
+},
+postImage: {
+  width: "100%",
+  height: 200,
+},
+postCaption: {
+  color: "#ccc",
+  fontSize: 14,
+  padding: 10,
+},
+gridItem: {
+  backgroundColor: "#2c2c2c",
+  borderRadius: 10,
+  marginBottom: 16,
+  width: "48%",
+  overflow: "hidden",
+},
+gridImage: {
+  width: "100%",
+  height: 150,
+},
+gridCaption: {
+  padding: 8,
+  color: "#ccc",
+  fontSize: 13,
+},
 
-export default AllUsers;
+
+});

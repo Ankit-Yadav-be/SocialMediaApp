@@ -8,20 +8,21 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { useAuth } from '../../context/authContext';
 import axios from 'axios';
 import { FontAwesome, Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PostCard = ({ post, fetchFeed }) => {
   const [liked, setLiked] = useState(post.likes.includes(post.user._id));
   const [commentText, setCommentText] = useState('');
   const [showAllComments, setShowAllComments] = useState(false);
-  const { token } = useAuth();
+
   const router = useRouter();
 
   const handleLike = async () => {
     try {
+      const token = await AsyncStorage.getItem("token");
       await axios.put(
         `https://social-media-app-six-nu.vercel.app/api/posts/like/${post._id}`,
         {},
@@ -37,6 +38,7 @@ const PostCard = ({ post, fetchFeed }) => {
   const handleComment = async () => {
     if (!commentText.trim()) return;
     try {
+      const token = await AsyncStorage.getItem("token");
       await axios.put(
         `https://social-media-app-six-nu.vercel.app/api/posts/comment/${post._id}`,
         { text: commentText },
@@ -115,12 +117,14 @@ const PostCard = ({ post, fetchFeed }) => {
           >
             {post.comments.map((c, i) => (
               <View key={i} style={styles.commentItem}>
-                <Image
-                  source={{
-                    uri: c.user?.profilePic || 'https://i.pravatar.cc/300',
-                  }}
-                  style={styles.commentAvatar}
-                />
+                <TouchableOpacity onPress={() => { router.push(`/(screens)/${c.user._id}`) }}>
+                  <Image
+                    source={{
+                      uri: c.user?.profilePic || 'https://i.pravatar.cc/300',
+                    }}
+                    style={styles.commentAvatar}
+                  />
+                </TouchableOpacity>
                 <View style={styles.commentContent}>
                   <Text style={styles.commentText}>
                     <Text style={styles.commentUsername}>{c.user?.name}: </Text>
@@ -140,12 +144,14 @@ export default PostCard;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#121212',
     marginVertical: 12,
     marginHorizontal: 10,
-    padding:10 ,
+    padding: 9,
     borderRadius: 16,
     elevation: 4,
+    borderWidth: 1,
+    borderColor: "#9e9a9aff"
   },
   header: {
     flexDirection: 'row',
@@ -201,7 +207,7 @@ const styles = StyleSheet.create({
   commentInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2e2e42',
+    backgroundColor: '#1f1f24ff',
     borderRadius: 10,
     paddingHorizontal: 12,
     marginBottom: 10,
@@ -238,7 +244,7 @@ const styles = StyleSheet.create({
   },
   commentContent: {
     flex: 1,
-    backgroundColor: '#2e2e4bff',
+    backgroundColor: '#1f1f24ff',
     borderRadius: 6,
     padding: 8,
   },

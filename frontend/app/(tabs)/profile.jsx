@@ -1,13 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-import LogoutButton from '../../component/profile/Logout'
+import UserProfileScreen from '../../component/home/UserPofile'
 
 const profile = () => {
   return (
-    <View>
-      <Text>profile</Text>
-      <LogoutButton/>
-    </View>
+    
+      <UserProfileScreen/>
+    
   )
 }
 

@@ -138,3 +138,23 @@ export const getAllPostsByPostId = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch posts", error });
   }
 };
+
+// POST /api/posts/share/:postId
+export const sharePost = async (req, res) => {
+  try {
+    const originalPost = await Post.findById(req.params.postId);
+    if (!originalPost) return res.status(404).json({ message: "Post not found" });
+
+    const newPost = await Post.create({
+      user: req.user._id, // assuming you're using protect middleware
+      image: originalPost.image,
+      caption: originalPost.caption, // optional
+      sharedFrom: originalPost._id,
+      shareText: req.body.shareText || "",
+    });
+
+    res.status(201).json(newPost);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -120,17 +120,19 @@ export default function AllUsers() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1e1e2f',
+    backgroundColor: '#121212',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e1e2f',
+    backgroundColor: '#1f1f24ff',
     marginHorizontal: 16,
     borderRadius: 14,
-    paddingHorizontal: 14,
+    paddingHorizontal: 15,
     paddingVertical: 10,
     marginBottom: 12,
+     borderWidth:1,
+    borderColor:'#dededeff',
   },
   searchIcon: {
     marginRight: 8,
@@ -147,7 +149,7 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: '#1c1c2c',
+    backgroundColor: '#1f1f24ff',
     marginBottom: 14,
     padding: 14,
     borderRadius: 16,

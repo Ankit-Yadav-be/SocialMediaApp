@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: "#0f0f1a",
-    paddingTop: 10,
+    paddingTop: 35,
   },
   container: {
     backgroundColor: "#0f0f1a",

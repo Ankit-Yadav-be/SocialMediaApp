@@ -8,12 +8,14 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { Ionicons } from "@expo/vector-icons";
-import { uploadToCloudinary } from "../../utils/uploadToCloudinary"; // ✅ same as register
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
+import { router } from "expo-router";
 
 export default function CreatePostScreen() {
   const [caption, setCaption] = useState("");
@@ -39,8 +41,7 @@ export default function CreatePostScreen() {
 
   const getToken = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      return token;
+      return await AsyncStorage.getItem("token");
     } catch (error) {
       console.error("Error getting token:", error);
       return null;
@@ -55,21 +56,18 @@ export default function CreatePostScreen() {
     setUploading(true);
 
     try {
-      // 1. Upload image to Cloudinary
       const imageUrl = await uploadToCloudinary(image);
       if (!imageUrl) {
         setUploading(false);
         return Alert.alert("Error", "Image upload failed.");
       }
 
-      // 2. Get token from AsyncStorage
       const token = await getToken();
       if (!token) {
         setUploading(false);
         return Alert.alert("Error", "User not authenticated.");
       }
 
-      // 3. Send post data to backend
       const payload = { caption, image: imageUrl };
 
       const res = await axios.post(
@@ -85,6 +83,7 @@ export default function CreatePostScreen() {
       Alert.alert("Success", "Post created successfully!");
       setCaption("");
       setImage(null);
+      router.push(`/(screens)/${res.data.user}`);
     } catch (error) {
       console.error("Post error:", error);
       Alert.alert("Error", "Failed to create post.");
@@ -95,36 +94,50 @@ export default function CreatePostScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create a New Post</Text>
+      <Text style={styles.title}>Create Post</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Write a caption..."
-        value={caption}
-        onChangeText={setCaption}
-        multiline
-      />
+      <View style={styles.card}>
+        <TextInput
+          style={styles.input}
+          placeholder="Write a caption..."
+          placeholderTextColor="#aaa"
+          value={caption}
+          onChangeText={setCaption}
+          multiline
+        />
 
-      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-        <Ionicons name="image" size={22} color="#444" />
-        <Text style={styles.pickText}>
-          {image ? "Change Image" : "Pick an Image"}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+          <Ionicons name="image-outline" size={22} color="#ccc" />
+          <Text style={styles.pickText}>
+            {image ? "Change Image" : "Pick an Image"}
+          </Text>
+        </TouchableOpacity>
 
-      {image && <Image source={{ uri: image.uri }} style={styles.imagePreview} />}
-
-      <TouchableOpacity
-        style={[styles.postButton, uploading && { backgroundColor: "#aaa" }]}
-        onPress={handlePost}
-        disabled={uploading}
-      >
-        {uploading ? (
-          <ActivityIndicator color="#fff" />
+        {image ? (
+          <Image source={{ uri: image.uri }} style={styles.imagePreview} />
         ) : (
-          <Text style={styles.postText}>Post</Text>
+          <View style={styles.placeholder}>
+            <MaterialCommunityIcons
+              name="image-off-outline"
+              size={60}
+              color="#555"
+            />
+            <Text style={{ color: "#777" }}>No Image Selected</Text>
+          </View>
         )}
-      </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.postButton, uploading && { backgroundColor: "#444" }]}
+          onPress={handlePost}
+          disabled={uploading}
+        >
+          {uploading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.postText}>Post</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -132,51 +145,81 @@ export default function CreatePostScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: "#f4f4f4",
+    backgroundColor: "#121212",
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? 50 : 60,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 16,
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 20,
     textAlign: "center",
   },
+  card: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 10,
+  },
   input: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 12,
+    backgroundColor: "#2b2b2b",
+    borderRadius: 12,
+    padding: 14,
     fontSize: 16,
     minHeight: 100,
     textAlignVertical: "top",
+    borderColor: "#333",
     borderWidth: 1,
-    borderColor: "#ccc",
+    color: "#fff",
     marginBottom: 16,
   },
   imagePicker: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#e5e5e5",
+    backgroundColor: "#2c2c2e",
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 10,
     marginBottom: 16,
   },
   pickText: {
     fontSize: 16,
     marginLeft: 10,
-    color: "#444",
+    color: "#ccc",
   },
   imagePreview: {
     width: "100%",
-    height: 200,
-    borderRadius: 10,
+    height: 220,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  placeholder: {
+    width: "100%",
+    height: 220,
+    borderRadius: 12,
+    borderColor: "#333",
+    borderWidth: 1,
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 16,
   },
   postButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#2c2c2e",
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: "center",
+    shadowColor: "#020507ff",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0,
+    shadowRadius: 6,
+    borderColor:'#5e5e60ff',
+    borderWidth:2,
+    elevation: 5,
   },
   postText: {
     color: "#fff",
