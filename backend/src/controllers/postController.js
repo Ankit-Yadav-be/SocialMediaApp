@@ -142,7 +142,7 @@ export const getAllPostsByPostId = async (req, res) => {
 // POST /api/posts/share/:postId
 export const sharePost = async (req, res) => {
   try {
-    const originalPost = await Post.findById(req.params.postId);
+    const originalPost = await Post.findById(req.params.id);
     if (!originalPost) return res.status(404).json({ message: "Post not found" });
      console.log(req.body.shareText)
     const newPost = await Post.create({
