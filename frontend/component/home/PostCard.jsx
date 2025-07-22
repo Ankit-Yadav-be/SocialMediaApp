@@ -43,7 +43,7 @@ const PostCard = ({ post, fetchFeed }) => {
     if (!shareText.trim()) return;
     try {
       const token = await AsyncStorage.getItem("token");
-      await axios.post(
+      await axios.put(
         `https://social-media-app-six-nu.vercel.app/api/posts/share/${post._id}`,
         { shareText },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -187,9 +187,9 @@ const PostCard = ({ post, fetchFeed }) => {
               <Pressable onPress={() => setShareModalVisible(false)} style={modalStyles.cancelButton}>
                 <Text style={modalStyles.buttonText}>Cancel</Text>
               </Pressable>
-              <TouchableOpacity onPress={handleShare} style={modalStyles.sendButton}>
+              <Pressable onPress={handleShare} style={modalStyles.sendButton}>
                 <Text style={modalStyles.buttonText}>Send</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </View>

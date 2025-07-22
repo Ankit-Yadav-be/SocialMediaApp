@@ -14,8 +14,8 @@ const router = express.Router();
 
 router.post("/", protect, createPost);
 router.get("/feed", protect, getFeedPosts);
-router.put("/share/:id", protect, sharePost); 
 router.put("/like/:id", protect, likeOrUnlikePost);
+router.put("/share/:id", protect, sharePost); 
 router.get("/allPostbyPostId/:id", getAllPostsByPostId);
 router.put("/comment/:id", protect, addComment);
 router.get("/getpost/:id", getAllPosts);

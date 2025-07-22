@@ -144,7 +144,7 @@ export const sharePost = async (req, res) => {
   try {
     const originalPost = await Post.findById(req.params.postId);
     if (!originalPost) return res.status(404).json({ message: "Post not found" });
-
+     console.log(req.body.shareText)
     const newPost = await Post.create({
       user: req.user._id, // assuming you're using protect middleware
       image: originalPost.image,
