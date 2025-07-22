@@ -5,6 +5,7 @@ import {
   getAllPosts,
   getAllPostsByPostId,
   getFeedPosts,
+  getShareCount,
   likeOrUnlikePost,
   sharePost,
 } from "../controllers/postController.js";
@@ -19,5 +20,7 @@ router.put("/share/:id", protect, sharePost);
 router.get("/allPostbyPostId/:id", getAllPostsByPostId);
 router.put("/comment/:id", protect, addComment);
 router.get("/getpost/:id", getAllPosts);
+router.get('/share-count/:id', getShareCount);
+
 
 export default router;

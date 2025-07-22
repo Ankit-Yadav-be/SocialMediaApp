@@ -13,7 +13,7 @@ const postSchema = new mongoose.Schema(
     caption: { type: String, default: "" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [commentSchema], // Embedded comments
-    sharedFrom: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post", default: null }], 
+    sharedFrom: { type: mongoose.Schema.Types.ObjectId, ref: "Post", default: null }, 
     shareText: { type: String, default: "" }, 
   },
   { timestamps: true }

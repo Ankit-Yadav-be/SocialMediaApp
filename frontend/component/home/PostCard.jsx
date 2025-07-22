@@ -21,7 +21,7 @@ const PostCard = ({ post, fetchFeed }) => {
   const [showAllComments, setShowAllComments] = useState(false);
   const [shareText, setShareText] = useState('');
   const [shareModalVisible, setShareModalVisible] = useState(false);
-
+  const [shareData,setShareData] = useState();
   const router = useRouter();
 
   const handleLike = async () => {
@@ -43,12 +43,13 @@ const PostCard = ({ post, fetchFeed }) => {
     if (!shareText.trim()) return;
     try {
       const token = await AsyncStorage.getItem("token");
-      await axios.put(
+      const res =  await axios.put(
         `https://social-media-app-six-nu.vercel.app/api/posts/share/${post._id}`,
         { shareText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setShareText('');
+      setShareData(res,data);
       setShareModalVisible(false);
       fetchFeed();
     } catch (err) {
@@ -92,6 +93,7 @@ const PostCard = ({ post, fetchFeed }) => {
           onPress={() => setShareModalVisible(true)}
           style={styles.shareIcon}
         >
+          <Text>{shareData.sharedFrom.length()}</Text>
           <Feather name="share-2" size={22} color="#ccc" />
         </TouchableOpacity>
       </View>

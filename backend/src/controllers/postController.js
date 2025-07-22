@@ -158,3 +158,14 @@ export const sharePost = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// controllers/postController.js
+export const getShareCount = async (req, res) => {
+  try {
+    const count = await Post.countDocuments({ sharedFrom: req.params.id });
+    res.status(200).json({ count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
