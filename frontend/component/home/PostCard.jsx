@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import axios from 'axios';
 import { FontAwesome, Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Audio } from 'expo-av';
 
 const PostCard = ({ post, fetchFeed }) => {
   const [liked, setLiked] = useState(post.likes.includes(post.user._id));
@@ -21,8 +22,67 @@ const PostCard = ({ post, fetchFeed }) => {
   const [showAllComments, setShowAllComments] = useState(false);
   const [shareText, setShareText] = useState('');
   const [shareModalVisible, setShareModalVisible] = useState(false);
-  const [shareCount, setShareCount] = useState(0);
   const router = useRouter();
+  console.log(post.music.title)
+ const soundRef = useRef(null);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+useEffect(() => {
+  Audio.setAudioModeAsync({
+    allowsRecordingIOS: false,
+    staysActiveInBackground: false,
+    playsInSilentModeIOS: true,
+    shouldDuckAndroid: true,
+    playThroughEarpieceAndroid: false,
+  });
+
+  return () => {
+    if (soundRef.current) {
+      soundRef.current.unloadAsync();
+    }
+  };
+}, []);
+
+
+
+const togglePlayPause = async () => {
+  try {
+  if (!post.music || !post.music.url) {
+  console.log("Music object or URL is missing");
+  return;
+}
+
+
+    if (!soundRef.current) {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: post.music.url },
+        { shouldPlay: true }
+      );
+      soundRef.current = sound;
+      setIsLoaded(true);
+      setIsPlaying(true);
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          setIsPlaying(false);
+        }
+      });
+    } else {
+      const status = await soundRef.current.getStatusAsync();
+      if (status.isPlaying) {
+        await soundRef.current.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        await soundRef.current.playAsync();
+        setIsPlaying(true);
+      }
+    }
+  } catch (error) {
+    console.log("Audio error:", error.message);
+  }
+};
+
 
   const handleLike = async () => {
     try {
@@ -43,7 +103,7 @@ const PostCard = ({ post, fetchFeed }) => {
     if (!shareText.trim()) return;
     try {
       const token = await AsyncStorage.getItem("token");
-      const res = await axios.put(
+      await axios.put(
         `https://social-media-app-six-nu.vercel.app/api/posts/share/${post._id}`,
         { shareText },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -67,13 +127,10 @@ const PostCard = ({ post, fetchFeed }) => {
       );
       setCommentText('');
       fetchFeed();
-
     } catch (err) {
       console.log('Error adding comment', err.message);
     }
   };
-
-
 
   return (
     <View style={styles.card}>
@@ -90,12 +147,10 @@ const PostCard = ({ post, fetchFeed }) => {
           </Text>
         </View>
 
-        {/* Share Icon */}
         <TouchableOpacity
           onPress={() => setShareModalVisible(true)}
           style={styles.shareIcon}
         >
-
           <Ionicons name="share-social-outline" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -105,6 +160,18 @@ const PostCard = ({ post, fetchFeed }) => {
 
       {/* Caption */}
       <Text style={styles.caption}>{post.caption}</Text>
+
+      {/* Music (optional) */}
+   {post.music?.url && (
+  <TouchableOpacity
+    onPress={togglePlayPause}
+    style={styles.audioButton}
+  >
+    <Text style={styles.audioButtonText}>
+      {isPlaying ? '⏸ Pause Music' : `▶️ Play: ${post.music.title || 'Audio Track'}`}
+    </Text>
+  </TouchableOpacity>
+)}
 
       {/* Actions */}
       <View style={styles.actions}>
@@ -140,7 +207,7 @@ const PostCard = ({ post, fetchFeed }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Comment List */}
+      {/* Comments */}
       {showAllComments && (
         <View style={styles.commentSection}>
           <ScrollView
@@ -330,6 +397,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
     borderRadius: 8,
   },
+  audioButton: {
+    backgroundColor: '#4f46e5',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  audioButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'Outfit-Bold',
+  },
 });
 
 const modalStyles = StyleSheet.create({
@@ -385,4 +464,17 @@ const modalStyles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Outfit-Bold',
   },
+  audioButton: {
+  backgroundColor: '#4f46e5',
+  padding: 10,
+  borderRadius: 10,
+  marginBottom: 12,
+  alignItems: 'center',
+},
+audioButtonText: {
+  color: '#fff',
+  fontSize: 14,
+  fontFamily: 'Outfit-Bold',
+},
+
 });

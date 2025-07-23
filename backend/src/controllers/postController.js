@@ -35,7 +35,9 @@ export const getFeedPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("user", "name email profilePic") // Post author
       .populate("comments.user", "name email profilePic") // Comment authors
-      .populate("likes", "name email profilePic"); // Users who liked the post
+      .populate("likes", "name email profilePic")
+      .populate("music", "url title")
+      ; // Users who liked the post
 
     res.status(200).json(posts);
   } catch (error) {
