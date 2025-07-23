@@ -116,6 +116,7 @@ export const getAllPosts = async (req, res) => {
       .populate("user", "name email profilePic")
       .populate("likes", "name email profilePic")
       .populate("comments.user", "name email profilePic")
+      .populate("music", "url title")
       .sort({ createdAt: -1 }); // Latest first
 
     res.status(200).json(posts);

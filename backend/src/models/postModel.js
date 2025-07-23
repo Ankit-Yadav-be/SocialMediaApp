@@ -12,7 +12,11 @@ const postSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     image: { type: String, required: true },
     caption: { type: String, default: "" },
-    music: { type: mongoose.Schema.Types.ObjectId, ref: "Music", default: null }, // ✅ music ref
+    music: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Music",
+      default: null,
+    }, // ✅ music ref
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [commentSchema],
     sharedFrom: {
