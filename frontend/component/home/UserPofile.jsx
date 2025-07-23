@@ -23,22 +23,22 @@ export default function UserProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
-  
+
   const logout = useLogout();
 
-   const fetchPosts = async (userId) => {
-  try {
-    const token = await AsyncStorage.getItem('token');
-    const res = await axios.get(
-      `https://social-media-app-six-nu.vercel.app/api/posts/getpost/${userId}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setPosts(Array.isArray(res.data) ? res.data : []);
-  } catch (err) {
-    console.error('Error fetching posts:', err);
-    setPosts([]); // fallback
-  }
-};
+  const fetchPosts = async (userId) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const res = await axios.get(
+        `https://social-media-app-six-nu.vercel.app/api/posts/getpost/${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPosts(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setPosts([]); // fallback
+    }
+  };
 
   const fetchUserProfile = async () => {
     try {
@@ -52,8 +52,8 @@ export default function UserProfileScreen() {
         }
       );
       setUser(data);
-     fetchPosts(data?._id)
-     
+      fetchPosts(data?._id)
+
     } catch (error) {
       console.error("Error fetching profile", error);
     } finally {
@@ -80,16 +80,16 @@ export default function UserProfileScreen() {
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
             <Image source={{ uri: user.profilePic }} style={styles.avatar} />
-             <View>
-               <TouchableOpacity
-              style={styles.editBtnIcon}
-              onPress={() =>
-                Alert.alert("Coming Soon", "Edit Profile Feature")
-              }
-            >
-              <Feather name="edit" size={16} color="#2e23e" />
-            </TouchableOpacity>
-             </View>
+            <View>
+              <TouchableOpacity
+                style={styles.editBtnIcon}
+                onPress={() =>
+                  Alert.alert("Coming Soon", "Edit Profile Feature")
+                }
+              >
+                <Feather name="edit" size={16} color="#2e23e" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <Text style={styles.name}>{user.name}</Text>
@@ -125,12 +125,12 @@ export default function UserProfileScreen() {
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => (
                 <View style={styles.followerItem}>
-                 <TouchableOpacity onPress={()=>{router.push(`/(screens)/${item._id}`)}}>
-                   <Image
-                    source={{ uri: item.profilePic }}
-                    style={styles.followerAvatar}
-                  />
-                 </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { router.push(`/(screens)/${item._id}`) }}>
+                    <Image
+                      source={{ uri: item.profilePic }}
+                      style={styles.followerAvatar}
+                    />
+                  </TouchableOpacity>
                   <Text style={styles.followerName}>
                     {item.name.length > 8
                       ? item.name.slice(0, 8) + "…"
@@ -153,11 +153,11 @@ export default function UserProfileScreen() {
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => (
                 <View style={styles.followerItem}>
-                  <TouchableOpacity onPress={()=>{router.push(`/(screens)/${item._id}`)}}>
+                  <TouchableOpacity onPress={() => { router.push(`/(screens)/${item._id}`) }}>
                     <Image
-                    source={{ uri: item.profilePic }}
-                    style={styles.followerAvatar}
-                  />
+                      source={{ uri: item.profilePic }}
+                      style={styles.followerAvatar}
+                    />
                   </TouchableOpacity>
                   <Text style={styles.followerName}>
                     {item.name.length > 8
@@ -182,47 +182,47 @@ export default function UserProfileScreen() {
           </View>
 
           <View style={styles.detailItem}>
-  <View style={styles.iconWrapper}>
-    <Feather name="calendar" size={16} color="#1a1a1a" />
-  </View>
-  <Text style={styles.detailText}>
-    Joined: {new Date(user.createdAt).toDateString()}
-  </Text>
-</View>
+            <View style={styles.iconWrapper}>
+              <Feather name="calendar" size={16} color="#1a1a1a" />
+            </View>
+            <Text style={styles.detailText}>
+              Joined: {new Date(user.createdAt).toDateString()}
+            </Text>
+          </View>
 
-{/* Logout Button */}
-<TouchableOpacity style={styles.logoutButton} onPress={logout}>
-  <Text style={styles.logoutText}>Logout</Text>
-</TouchableOpacity>
-
-         
-          {/* User Posts */}
-<View style={styles.section}>
-  <Text style={styles.sectionTitle}>Posts</Text>
-  {posts.length === 0 ? (
-    <Text style={{ color: "#999", textAlign: "center" }}>No posts yet.</Text>
-  ) : (
-    <FlatList
-      data={posts}
-      keyExtractor={(item) => item._id}
-      numColumns={2}
-      columnWrapperStyle={{ justifyContent: "space-between" }}
-      scrollEnabled={false}
-      renderItem={({ item }) => (
-        <View style={styles.gridItem}>
-          <TouchableOpacity onPress={()=>router.push(`/(postscreen)/${item._id}`)}>
-            <Image source={{ uri: item.image }} style={styles.gridImage} />
+          {/* Logout Button */}
+          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+            <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
-          <Text style={styles.gridCaption}>
-            {item.caption.length > 50
-              ? `${item.caption.slice(0, 50)}...`
-              : item.caption}
-          </Text>
-        </View>
-      )}
-    />
-  )}
-</View>
+
+
+          {/* User Posts */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Posts</Text>
+            {posts.length === 0 ? (
+              <Text style={{ color: "#999", textAlign: "center" }}>No posts yet.</Text>
+            ) : (
+              <FlatList
+                data={posts}
+                keyExtractor={(item) => item._id}
+                numColumns={2}
+                columnWrapperStyle={{ justifyContent: "space-between" }}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <View style={styles.gridItem}>
+                    <TouchableOpacity onPress={() => router.push(`/(postscreen)/${item._id}`)}>
+                      <Image source={{ uri: item.image }} style={styles.gridImage} />
+                    </TouchableOpacity>
+                    <Text style={styles.gridCaption}>
+                      {item.caption.length > 50
+                        ? `${item.caption.slice(0, 50)}...`
+                        : item.caption}
+                    </Text>
+                  </View>
+                )}
+              />
+            )}
+          </View>
 
 
         </View>
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
     backgroundColor: "#121212",
-    paddingTop:40
+    paddingTop: 40
   },
   loaderContainer: {
     flex: 1,
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 4,
   },
-   followBtnText: {
+  followBtnText: {
     color: "#fff",
     fontSize: 15,
     fontFamily: "Outfit-Bold",
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     paddingVertical: 10,
 
-      borderRadius: 20,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "#fff",
   },
@@ -356,53 +356,53 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   postCard: {
-  backgroundColor: "#2c2c2c",
-  borderRadius: 10,
-  marginBottom: 16,
-  overflow: "hidden",
-  borderColor: "#444",
-  borderWidth: 1,
-},
-postImage: {
-  width: "100%",
-  height: 200,
-},
-postCaption: {
-  color: "#ccc",
-  fontSize: 14,
-  padding: 10,
-},
-gridItem: {
-  backgroundColor: "#2c2c2c",
-  borderRadius: 10,
-  marginBottom: 16,
-  width: "48%",
-  overflow: "hidden",
-},
-gridImage: {
-  width: "100%",
-  height: 150,
-},
-gridCaption: {
-  padding: 8,
-  color: "#ccc",
-  fontSize: 13,
-},
+    backgroundColor: "#2c2c2c",
+    borderRadius: 10,
+    marginBottom: 16,
+    overflow: "hidden",
+    borderColor: "#444",
+    borderWidth: 1,
+  },
+  postImage: {
+    width: "100%",
+    height: 200,
+  },
+  postCaption: {
+    color: "#ccc",
+    fontSize: 14,
+    padding: 10,
+  },
+  gridItem: {
+    backgroundColor: "#2c2c2c",
+    borderRadius: 10,
+    marginBottom: 16,
+    width: "48%",
+    overflow: "hidden",
+  },
+  gridImage: {
+    width: "100%",
+    height: 150,
+  },
+  gridCaption: {
+    padding: 8,
+    color: "#ccc",
+    fontSize: 13,
+  },
 
-logoutButton: {
-  marginTop: 16,
-  backgroundColor: "#2c2c2c",
-  paddingVertical: 12,
-  borderRadius: 10,
-  alignItems: "center",
-  justifyContent: "center",
-  borderWidth:1,
-  borderColor:'#fff'
-},
-logoutText: {
-  color: "#fff",
-  fontSize: 16,
-  fontWeight: "bold",
-},
+  logoutButton: {
+    marginTop: 16,
+    backgroundColor: "#2c2c2c",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: '#fff'
+  },
+  logoutText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 
 });

@@ -31,7 +31,6 @@ export const uploadToCloudinary = async (image) => {
   }
 };
 
-
 export const uploadVideoToCloudinary = async (videoUri) => {
   const cloudName = "dx1libiis"; // ✅ your actual cloud name
   const presetName = "socialMediaApp"; // ✅ same or different preset if needed
@@ -62,6 +61,40 @@ export const uploadVideoToCloudinary = async (videoUri) => {
     }
   } catch (error) {
     console.error("❌ Video Upload Error:", error);
+    return null;
+  }
+};
+
+export const uploadAudioToCloudinary = async (audio) => {
+  const cloudName = "dx1libiis"; // ✅ your Cloudinary cloud name
+  const presetName = "socialMediaApp"; // ✅ your unsigned upload preset
+  const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`; // 'video' works for audio too
+
+  const formData = new FormData();
+  formData.append("file", {
+    uri: audio.uri,
+    type: "audio/mpeg", // or 'audio/mp3' depending on file
+    name: "upload.mp3",
+  });
+  formData.append("upload_preset", presetName);
+
+  try {
+    const response = await fetch(uploadUrl, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (data.secure_url) {
+      console.log("✅ Uploaded Audio URL:", data.secure_url);
+      return data.secure_url;
+    } else {
+      console.error("❌ Cloudinary Audio Upload Failed:", data);
+      return null;
+    }
+  } catch (error) {
+    console.error("❌ Audio Upload Error:", error);
     return null;
   }
 };

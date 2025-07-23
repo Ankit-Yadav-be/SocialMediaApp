@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 12,
      borderWidth:1,
-    borderColor:'#dededeff',
+    borderColor:'#383636ff',
   },
   searchIcon: {
     marginRight: 8,

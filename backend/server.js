@@ -7,6 +7,7 @@ import userRoutes from "./src/routes/userRoutes.js"
 import postRoutes from "./src/routes/postRoutes.js"
 import notificationRoutes from "./src/routes/notificationRoutes.js"
 import reelsRoutes from "./src/routes/reelRoutes.js"
+import musicRoutes from "./src/routes/musicRoutes.js"
 const app = express()
 
 dotenv.config();
@@ -24,7 +25,7 @@ app.use("/api/users",userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/reels", reelsRoutes);
 app.use("/api/notifications", notificationRoutes);
-
+app.use("/api/music",musicRoutes);
 
 export default app;
 

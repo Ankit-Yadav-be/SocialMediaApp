@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     elevation: 4,
     borderWidth: 1,
-    borderColor: "#9e9a9aff"
+    borderColor: "#383636ff"
   },
   header: {
     flexDirection: 'row',
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
-    borderColor: "#bbbbbbff",
+    borderColor: "#585757ff",
     padding: 8,
   },
   avatar: {
