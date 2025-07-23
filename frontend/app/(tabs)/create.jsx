@@ -15,11 +15,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
+import { uploadVideoToCloudinary } from "../../utils/uploadToCloudinary";
 import { router } from "expo-router";
 
 export default function CreatePostScreen() {
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState(null);
+  const [video, setVideo] = useState(null);
   const [uploading, setUploading] = useState(false);
 
   const pickImage = async () => {
@@ -36,6 +38,25 @@ export default function CreatePostScreen() {
 
     if (!result.canceled) {
       setImage({ uri: result.assets[0].uri });
+      setVideo(null); // clear video if image picked
+    }
+  };
+
+  const pickVideo = async () => {
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!granted) {
+      Alert.alert("Permission Required", "Please allow access to media library.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setVideo({ uri: result.assets[0].uri });
+      setImage(null); // clear image if video picked
     }
   };
 
@@ -71,7 +92,7 @@ export default function CreatePostScreen() {
       const payload = { caption, image: imageUrl };
 
       const res = await axios.post(
-        "https://social-media-app-six-nu.vercel.app/api/posts",
+        "https://social-media-app-six-nu.vercel.app/api/posts", // ✅ replace with your real endpoint
         payload,
         {
           headers: {
@@ -92,9 +113,53 @@ export default function CreatePostScreen() {
     }
   };
 
+  const handleReel = async () => {
+    if (!caption || !video) {
+      return Alert.alert("Error", "Caption and video are required.");
+    }
+
+    setUploading(true);
+
+    try {
+      const videoUrl = await uploadVideoToCloudinary(video.uri);
+      if (!videoUrl) {
+        setUploading(false);
+        return Alert.alert("Error", "Video upload failed.");
+      }
+
+      const token = await getToken();
+      if (!token) {
+        setUploading(false);
+        return Alert.alert("Error", "User not authenticated.");
+      }
+
+      const payload = { caption, video: videoUrl };
+
+      const res = await axios.post(
+        "https://social-media-app-six-nu.vercel.app/api/reels", // ✅ replace with your real endpoint
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      Alert.alert("Success", "Reel uploaded successfully!");
+      setCaption("");
+      setVideo(null);
+      router.push(`/(screens)/${res.data.user}`);
+    } catch (error) {
+      console.error("Reel error:", error);
+      Alert.alert("Error", "Failed to upload reel.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create Post</Text>
+      <Text style={styles.title}>Create Post / Upload Reel</Text>
 
       <View style={styles.card}>
         <TextInput
@@ -113,30 +178,54 @@ export default function CreatePostScreen() {
           </Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.imagePicker} onPress={pickVideo}>
+          <Ionicons name="videocam-outline" size={22} color="#ccc" />
+          <Text style={styles.pickText}>
+            {video ? "Change Video" : "Pick a Video"}
+          </Text>
+        </TouchableOpacity>
+
         {image ? (
           <Image source={{ uri: image.uri }} style={styles.imagePreview} />
+        ) : video ? (
+          <View style={styles.placeholder}>
+            <MaterialCommunityIcons name="video-outline" size={60} color="#555" />
+            <Text style={{ color: "#777" }}>Video selected</Text>
+          </View>
         ) : (
           <View style={styles.placeholder}>
-            <MaterialCommunityIcons
-              name="image-off-outline"
-              size={60}
-              color="#555"
-            />
-            <Text style={{ color: "#777" }}>No Image Selected</Text>
+            <MaterialCommunityIcons name="image-off-outline" size={60} color="#555" />
+            <Text style={{ color: "#777" }}>No Media Selected</Text>
           </View>
         )}
 
-        <TouchableOpacity
-          style={[styles.postButton, uploading && { backgroundColor: "#444" }]}
-          onPress={handlePost}
-          disabled={uploading}
-        >
-          {uploading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.postText}>Post</Text>
-          )}
-        </TouchableOpacity>
+        {image && (
+          <TouchableOpacity
+            style={[styles.postButton, uploading && { backgroundColor: "#444" }]}
+            onPress={handlePost}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.postText}>Post</Text>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {video && (
+          <TouchableOpacity
+            style={[styles.postButton, uploading && { backgroundColor: "#444", marginTop: 10 }]}
+            onPress={handleReel}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.postText}>Upload Video for Reel</Text>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -213,11 +302,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
-    shadowColor: "#020507ff",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0,
-    shadowRadius: 6,
-    borderColor: '#5e5e60ff',
+    borderColor: "#5e5e60ff",
     borderWidth: 2,
     elevation: 5,
   },

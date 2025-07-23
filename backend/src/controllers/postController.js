@@ -143,8 +143,9 @@ export const getAllPostsByPostId = async (req, res) => {
 export const sharePost = async (req, res) => {
   try {
     const originalPost = await Post.findById(req.params.id);
-    if (!originalPost) return res.status(404).json({ message: "Post not found" });
-     console.log(req.body.shareText)
+    if (!originalPost)
+      return res.status(404).json({ message: "Post not found" });
+    console.log(req.body.shareText);
     const newPost = await Post.create({
       user: req.user._id, // assuming you're using protect middleware
       image: originalPost.image,
@@ -168,4 +169,3 @@ export const getShareCount = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-

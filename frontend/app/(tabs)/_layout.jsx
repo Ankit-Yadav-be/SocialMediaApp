@@ -40,6 +40,14 @@ export default function TabLayout() {
           ),
         }}
       />
+       <Tabs.Screen
+        name="reels"
+        options={{
+          tabBarIcon: ({ color, size }) => (
+           <Ionicons name="caret-back-circle-outline" size={30} color="#fff" />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="profile"
         options={{
