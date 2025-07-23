@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker"; // ✅ install this
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
 import { uploadVideoToCloudinary } from "../../utils/uploadToCloudinary";
 import { router } from "expo-router";
@@ -23,13 +24,26 @@ export default function CreatePostScreen() {
   const [image, setImage] = useState(null);
   const [video, setVideo] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [musicList, setMusicList] = useState([]);
+  const [selectedMusic, setSelectedMusic] = useState("");
+
+  useEffect(() => {
+    fetchMusic();
+  }, []);
+
+  const fetchMusic = async () => {
+    try {
+      const res = await axios.get("https://social-media-app-six-nu.vercel.app/api/music");
+      setMusicList(res.data); // assume it's an array of { _id, title }
+    } catch (err) {
+      console.error("Music fetch error:", err.message);
+      setMusicList([]);
+    }
+  };
 
   const pickImage = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!granted) {
-      Alert.alert("Permission Required", "Please allow access to media library.");
-      return;
-    }
+    if (!granted) return Alert.alert("Permission Required", "Allow access to media library.");
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -38,16 +52,13 @@ export default function CreatePostScreen() {
 
     if (!result.canceled) {
       setImage({ uri: result.assets[0].uri });
-      setVideo(null); // clear video if image picked
+      setVideo(null);
     }
   };
 
   const pickVideo = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!granted) {
-      Alert.alert("Permission Required", "Please allow access to media library.");
-      return;
-    }
+    if (!granted) return Alert.alert("Permission Required", "Allow access to media library.");
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -56,7 +67,7 @@ export default function CreatePostScreen() {
 
     if (!result.canceled) {
       setVideo({ uri: result.assets[0].uri });
-      setImage(null); // clear image if video picked
+      setImage(null);
     }
   };
 
@@ -64,7 +75,7 @@ export default function CreatePostScreen() {
     try {
       return await AsyncStorage.getItem("token");
     } catch (error) {
-      console.error("Error getting token:", error);
+      console.error("Token error:", error);
       return null;
     }
   };
@@ -78,80 +89,62 @@ export default function CreatePostScreen() {
 
     try {
       const imageUrl = await uploadToCloudinary(image);
-      if (!imageUrl) {
-        setUploading(false);
-        return Alert.alert("Error", "Image upload failed.");
-      }
+      if (!imageUrl) throw new Error("Image upload failed");
 
       const token = await getToken();
-      if (!token) {
-        setUploading(false);
-        return Alert.alert("Error", "User not authenticated.");
-      }
+      if (!token) throw new Error("User not authenticated");
 
-      const payload = { caption, image: imageUrl };
+      const payload = {
+        caption,
+        image: imageUrl,
+        music: selectedMusic || null, // can be null
+      };
 
       const res = await axios.post(
-        "https://social-media-app-six-nu.vercel.app/api/posts", // ✅ replace with your real endpoint
+        "https://social-media-app-six-nu.vercel.app/api/posts",
         payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      Alert.alert("Success", "Post created successfully!");
+      Alert.alert("Success", "Post created!");
       setCaption("");
       setImage(null);
+      setSelectedMusic("");
       router.push(`/(screens)/${res.data.user}`);
     } catch (error) {
       console.error("Post error:", error);
-      Alert.alert("Error", "Failed to create post.");
+      Alert.alert("Error", error.message || "Failed to create post.");
     } finally {
       setUploading(false);
     }
   };
 
   const handleReel = async () => {
-    if (!caption || !video) {
-      return Alert.alert("Error", "Caption and video are required.");
-    }
-
+    if (!caption || !video) return Alert.alert("Error", "Caption and video are required.");
     setUploading(true);
 
     try {
       const videoUrl = await uploadVideoToCloudinary(video.uri);
-      if (!videoUrl) {
-        setUploading(false);
-        return Alert.alert("Error", "Video upload failed.");
-      }
+      if (!videoUrl) throw new Error("Video upload failed");
 
       const token = await getToken();
-      if (!token) {
-        setUploading(false);
-        return Alert.alert("Error", "User not authenticated.");
-      }
+      if (!token) throw new Error("User not authenticated");
 
       const payload = { caption, video: videoUrl };
 
       const res = await axios.post(
-        "https://social-media-app-six-nu.vercel.app/api/reels", // ✅ replace with your real endpoint
+        "https://social-media-app-six-nu.vercel.app/api/reels",
         payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      Alert.alert("Success", "Reel uploaded successfully!");
+      Alert.alert("Success", "Reel uploaded!");
       setCaption("");
       setVideo(null);
       router.push(`/(screens)/${res.data.user}`);
     } catch (error) {
       console.error("Reel error:", error);
-      Alert.alert("Error", "Failed to upload reel.");
+      Alert.alert("Error", error.message || "Failed to upload reel.");
     } finally {
       setUploading(false);
     }
@@ -160,7 +153,6 @@ export default function CreatePostScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Post / Upload Reel</Text>
-
       <View style={styles.card}>
         <TextInput
           style={styles.input}
@@ -170,6 +162,19 @@ export default function CreatePostScreen() {
           onChangeText={setCaption}
           multiline
         />
+
+        {/* Music Dropdown */}
+        <Picker
+          selectedValue={selectedMusic}
+          onValueChange={(itemValue) => setSelectedMusic(itemValue)}
+          style={{ backgroundColor: "#2c2c2e", color: "#fff", marginBottom: 16 }}
+          dropdownIconColor="#ccc"
+        >
+          <Picker.Item label="🎵 Select Music (optional)" value="" />
+          {musicList.map((track) => (
+            <Picker.Item key={track._id} label={track.title} value={track._id} />
+          ))}
+        </Picker>
 
         <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
           <Ionicons name="image-outline" size={22} color="#ccc" />
@@ -249,11 +254,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#1e1e1e",
     borderRadius: 16,
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 10,
   },
   input: {
     backgroundColor: "#2b2b2b",
@@ -304,7 +304,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "#5e5e60ff",
     borderWidth: 2,
-    elevation: 5,
   },
   postText: {
     color: "#fff",

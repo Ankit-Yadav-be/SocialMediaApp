@@ -13,7 +13,6 @@ import { uploadAudioToCloudinary } from '../utils/uploadToCloudinary';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const AudioUploadScreen = () => {
   const [audio, setAudio] = useState(null);
   const [title, setTitle] = useState('');
@@ -23,13 +22,21 @@ const AudioUploadScreen = () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'audio/*',
+        copyToCacheDirectory: true,
+        multiple: false,
       });
 
-      if (result.type === 'success') {
-        setAudio(result);
-      }
+   if (result.assets && result.assets.length > 0) {
+  const selectedAudio = result.assets[0];
+  setAudio(selectedAudio);
+  Alert.alert('🎵 Audio Selected', selectedAudio.name || 'File selected successfully!');
+} else {
+  Alert.alert('❌ Cancelled', 'No audio file was selected.');
+}
+
     } catch (error) {
       console.log('❌ Audio Picker Error:', error);
+      Alert.alert('Error', 'Something went wrong while picking audio.');
     }
   };
 
@@ -38,18 +45,14 @@ const AudioUploadScreen = () => {
       return Alert.alert('Error', 'Please provide both title and audio file');
     }
 
-    if (!user?.isAdmin) {
-      return Alert.alert('Unauthorized', 'Only admins can upload audio');
-    }
-
     setLoading(true);
     try {
-         const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('token');
       const audioUrl = await uploadAudioToCloudinary(audio);
       if (!audioUrl) throw new Error('Upload to Cloudinary failed');
 
-      const res = await axios.post(
-        'https://social-media-app-six-nu.vercel.app/api/api/music/upload',
+      await axios.post(
+        'https://social-media-app-six-nu.vercel.app/api/music/upload',
         { title, url: audioUrl },
         {
           headers: {
@@ -63,7 +66,7 @@ const AudioUploadScreen = () => {
       setAudio(null);
     } catch (err) {
       console.log('❌ Upload Error:', err);
-      Alert.alert('Error', 'Failed to upload audio');
+      Alert.alert('Upload Failed', 'Could not upload audio file.');
     } finally {
       setLoading(false);
     }
@@ -75,14 +78,14 @@ const AudioUploadScreen = () => {
 
       <TextInput
         style={styles.input}
-        placeholder="Enter title"
+        placeholder="Enter Music Title"
         value={title}
         onChangeText={setTitle}
       />
 
       <TouchableOpacity style={styles.button} onPress={pickAudio}>
         <Text style={styles.buttonText}>
-          {audio ? '🎵 Audio Selected' : '🎵 Pick Audio File'}
+          {audio ? `✅ ${audio.name}` : '🎵 Pick Audio File'}
         </Text>
       </TouchableOpacity>
 
@@ -107,33 +110,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fefefe',
     justifyContent: 'center',
   },
   heading: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#333',
+    color: '#111',
   },
   input: {
-    borderColor: '#ccc',
+    borderColor: '#ddd',
     borderWidth: 1,
-    borderRadius: 6,
+    borderRadius: 8,
     padding: 12,
     marginBottom: 15,
     backgroundColor: '#fff',
   },
   button: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#1d4ed8',
     padding: 15,
-    borderRadius: 6,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 16,
   },
 });

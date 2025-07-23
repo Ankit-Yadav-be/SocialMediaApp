@@ -6,7 +6,7 @@ dotenv.config();
 
 // create post
 export const createPost = async (req, res) => {
-  const { caption, image } = req.body;
+  const { caption, image, music } = req.body;
 
   try {
     if (!image) return res.status(400).json({ message: "Image is required" });
@@ -15,6 +15,7 @@ export const createPost = async (req, res) => {
       user: req.user._id,
       image: image,
       caption,
+      music
     });
 
     res.status(201).json(newPost);

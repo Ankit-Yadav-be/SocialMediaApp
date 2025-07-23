@@ -5,11 +5,11 @@ import SongUpload  from "../../component/SongUploadComponent"
 const profile = () => {
   return (
     
-      <View>
+     <>
         <UserProfileScreen/>
       <SongUpload/>
-      </View>
-    
+  
+    </>
   )
 }
 
