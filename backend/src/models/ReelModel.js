@@ -1,21 +1,22 @@
+// models/Reel.js
 import mongoose from "mongoose";
 
-const commentSchema = new mongoose.Schema({
+const reelCommentSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   text: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
-const postSchema = new mongoose.Schema(
+const reelSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    image: { type: String, required: true },
+    video: { type: String, required: true }, // Cloudinary video URL
     caption: { type: String, default: "" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    comments: [commentSchema], // Embedded comments
+    comments: [reelCommentSchema],
     sharedFrom: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
+      ref: "Reel",
       default: null,
     },
     shareText: { type: String, default: "" },
@@ -23,4 +24,4 @@ const postSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Post", postSchema);
+export default mongoose.model("Reel", reelSchema);

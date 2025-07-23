@@ -217,8 +217,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0,
     shadowRadius: 6,
-    borderColor:'#5e5e60ff',
-    borderWidth:2,
+    borderColor: '#5e5e60ff',
+    borderWidth: 2,
     elevation: 5,
   },
   postText: {

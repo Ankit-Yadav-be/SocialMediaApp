@@ -212,10 +212,17 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: "#0f0f1a",
-    paddingTop: 35,
+    paddingTop: 20,
+    
   },
   container: {
     backgroundColor: "#0f0f1a",
+       borderTopWidth: 1,
+       borderLeftWidth: 1,
+       borderRightWidth:1,
+       padding:9,
+    borderColor: "#9e9a9aff",
+       borderRadius: 16,
   },
   loader: {
     flex: 1,
@@ -237,7 +244,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
+    borderBottomWidth:1,
+    borderBottomLeftRadius:15,
+    borderBottomRightRadius:15,
+    padding:8,
+    borderColor: "#bbbbbbff",
+
   },
   avatar: {
     height: 50,

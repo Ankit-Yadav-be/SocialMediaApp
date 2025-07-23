@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Pressable,
 } from 'react-native';
 import axios from 'axios';
-import { FontAwesome, Feather } from '@expo/vector-icons';
+import { FontAwesome, Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -21,7 +21,7 @@ const PostCard = ({ post, fetchFeed }) => {
   const [showAllComments, setShowAllComments] = useState(false);
   const [shareText, setShareText] = useState('');
   const [shareModalVisible, setShareModalVisible] = useState(false);
-  const [shareData,setShareData] = useState();
+  const [shareCount, setShareCount] = useState(0);
   const router = useRouter();
 
   const handleLike = async () => {
@@ -43,13 +43,12 @@ const PostCard = ({ post, fetchFeed }) => {
     if (!shareText.trim()) return;
     try {
       const token = await AsyncStorage.getItem("token");
-      const res =  await axios.put(
+      const res = await axios.put(
         `https://social-media-app-six-nu.vercel.app/api/posts/share/${post._id}`,
         { shareText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setShareText('');
-      setShareData(res,data);
       setShareModalVisible(false);
       fetchFeed();
     } catch (err) {
@@ -68,10 +67,13 @@ const PostCard = ({ post, fetchFeed }) => {
       );
       setCommentText('');
       fetchFeed();
+
     } catch (err) {
       console.log('Error adding comment', err.message);
     }
   };
+
+
 
   return (
     <View style={styles.card}>
@@ -93,8 +95,8 @@ const PostCard = ({ post, fetchFeed }) => {
           onPress={() => setShareModalVisible(true)}
           style={styles.shareIcon}
         >
-          <Text>{shareData.sharedFrom.length()}</Text>
-          <Feather name="share-2" size={22} color="#ccc" />
+
+          <Ionicons name="share-social-outline" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -206,7 +208,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#121212',
     marginVertical: 12,
-    marginHorizontal: 10,
+    marginHorizontal: 0,
     padding: 9,
     borderRadius: 16,
     elevation: 4,
@@ -217,6 +219,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    borderColor: "#bbbbbbff",
+    padding: 8,
   },
   avatar: {
     width: 50,
@@ -320,7 +327,7 @@ const styles = StyleSheet.create({
   },
   shareIcon: {
     padding: 6,
-    backgroundColor: '#1f1f24ff',
+    backgroundColor: '#121212',
     borderRadius: 8,
   },
 });

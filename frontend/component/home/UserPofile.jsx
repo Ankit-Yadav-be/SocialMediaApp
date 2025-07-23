@@ -182,18 +182,20 @@ export default function UserProfileScreen() {
           </View>
 
           <View style={styles.detailItem}>
-            <View style={styles.iconWrapper}>
-              <Feather name="calendar" size={16} color="#1a1a1a" />
-            </View>
-            <Text style={styles.detailText}>
-              Joined: {new Date(user.createdAt).toDateString()}
-            </Text>
-          </View>
-          <View>
-            <TouchableOpacity style={styles.logoutBtnIcon} onPress={logout}>
-              <Ionicons name="log-out-outline" size={16} color="#2e23e" />
-            </TouchableOpacity>
-          </View>
+  <View style={styles.iconWrapper}>
+    <Feather name="calendar" size={16} color="#1a1a1a" />
+  </View>
+  <Text style={styles.detailText}>
+    Joined: {new Date(user.createdAt).toDateString()}
+  </Text>
+</View>
+
+{/* Logout Button */}
+<TouchableOpacity style={styles.logoutButton} onPress={logout}>
+  <Text style={styles.logoutText}>Logout</Text>
+</TouchableOpacity>
+
+         
           {/* User Posts */}
 <View style={styles.section}>
   <Text style={styles.sectionTitle}>Posts</Text>
@@ -268,14 +270,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 4,
   },
-  logoutBtnIcon: {
-    position: "absolute",
-    right: -0,
-    bottom: 100,
-    backgroundColor: "#ffffffff",
-    padding: 10,
-    borderRadius: 10,
-    elevation: 4,
+   followBtnText: {
+    color: "#fff",
+    fontSize: 15,
+    fontFamily: "Outfit-Bold",
+  },
+  followBtn: {
+    paddingHorizontal: 50,
+    paddingVertical: 10,
+
+      borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#fff",
   },
   name: {
     fontSize: 22,
@@ -383,5 +389,20 @@ gridCaption: {
   fontSize: 13,
 },
 
+logoutButton: {
+  marginTop: 16,
+  backgroundColor: "#2c2c2c",
+  paddingVertical: 12,
+  borderRadius: 10,
+  alignItems: "center",
+  justifyContent: "center",
+  borderWidth:1,
+  borderColor:'#fff'
+},
+logoutText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "bold",
+},
 
 });
