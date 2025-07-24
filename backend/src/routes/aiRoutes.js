@@ -2,24 +2,19 @@ import express from "express";
 import axios from "axios";
 
 const router = express.Router();
-const COHERE_API_KEY = "KwuRYacNfds6QS4AgxWoChRTZ6gY3t4mphFRwQQg"; // Replace this with your real key or use process.env
+const COHERE_API_KEY = "KwuRYacNfds6QS4AgxWoChRTZ6gY3t4mphFRwQQg"; // use from .env ideally
 
 router.post("/analyze-comment", async (req, res) => {
   const { comment } = req.body;
 
   try {
     const response = await axios.post(
-      "https://api.cohere.ai/v1/classify",
+      "https://api.cohere.ai/v1/generate",
       {
-        inputs: [comment],
-        examples: [
-          { text: "I love your work", label: "Positive" },
-          { text: "That's okay, I guess", label: "Neutral" },
-          { text: "You're so stupid", label: "Toxic" },
-          { text: "Amazing job!", label: "Positive" },
-          { text: "I hate you", label: "Toxic" },
-          { text: "Could be better", label: "Neutral" },
-        ],
+        prompt: `Analyze the tone of this comment: "${comment}". Reply only with one of the following: Positive, Neutral, or Toxic.`,
+        max_tokens: 10,
+        temperature: 0.3,
+        stop_sequences: ["\n"],
       },
       {
         headers: {
@@ -29,8 +24,8 @@ router.post("/analyze-comment", async (req, res) => {
       }
     );
 
-    const prediction = response.data.classifications?.[0]?.prediction;
-    res.json({ tone: prediction });
+    const text = response.data.generations?.[0]?.text?.trim();
+    res.json({ tone: text });
   } catch (error) {
     console.error("Cohere AI Error:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to analyze tone" });
