@@ -67,11 +67,8 @@ export const commentOnStory = async (req, res) => {
     return res.status(400).json({ message: "Comment text is required" });
   }
 
-  const story = await Story.findById(req.params.id)
-  populate({
-    path: "comments.user",
-    select: "name profilePic", // only send necessary fields
-  })
+  const story = await Story.findById(req.params.id);
+
   if (!story) {
     return res.status(404).json({ message: "Story not found" });
   }
@@ -84,5 +81,11 @@ export const commentOnStory = async (req, res) => {
   story.comments.push(comment);
   await story.save();
 
-  res.status(201).json(story.comments);
+  // repopulate after saving to get name & profilePic of commenter
+  const updatedStory = await Story.findById(req.params.id).populate({
+    path: "comments.user",
+    select: "name profilePic", // only send necessary fields
+  });
+
+  res.status(201).json(updatedStory.comments);
 };
