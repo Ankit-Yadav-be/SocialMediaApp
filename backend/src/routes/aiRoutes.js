@@ -35,3 +35,5 @@ router.post("/analyze-comment", async (req, res) => {
     res.status(500).json({ error: "Failed to analyze tone" });
   }
 });
+
+export default router;
