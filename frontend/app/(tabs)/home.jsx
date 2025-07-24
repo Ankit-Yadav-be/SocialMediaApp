@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import PostCard from '../../component/home/PostCard';
 import AllUsers from '../../component/home/AllUsers';
 import Story from "../../component/home/Status"
+import CommentTester from "../../component/CommentTester"
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,6 +82,7 @@ const HomeScreen = () => {
           }
           ListHeaderComponent={
             <>
+              <CommentTester/>
               <AllUsers />
               <Story />
               <Text style={styles.feedText}>Your Feed</Text>

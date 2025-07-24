@@ -20,7 +20,8 @@ import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Video } from "expo-av";
-import jwtDecode from "jwt-decode";
+import jwt_decode from "jwt-decode"; // ✅ ES6
+
 
 import {
   uploadToCloudinary,
@@ -56,7 +57,7 @@ const [userId, setUserId] = useState(null);
       const token = await AsyncStorage.getItem("token");
       if (token) {
         try {
-          const decoded = jwtDecode(token);
+          const decoded = jwt_decode(token);
           setUserId(decoded._id); // ✅ correctly referencing _id
         } catch (error) {
           console.error("Invalid token", error);
@@ -581,7 +582,8 @@ const [userId, setUserId] = useState(null);
                 >
                   Comments
                 </Text>
-{selectedStory.comments?.map((comment, index) => (
+
+             {selectedStory.comments?.map((comment, index) => (
   <View
     key={index}
     style={{
