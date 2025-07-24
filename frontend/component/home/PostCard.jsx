@@ -23,24 +23,38 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
   const [showAllComments, setShowAllComments] = useState(false);
   const [shareText, setShareText] = useState("");
   const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [commentSummary, setCommentSummary] = useState(null);
+  const [showToneSummary, setShowToneSummary] = useState(false); // 🔄 New toggle state
+
   const router = useRouter();
 
   const soundRef = useRef(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  
-  const analyzeCommentTone = async (text) => {
-  try {
-    const response = await axios.post("https://social-media-app-six-nu.vercel.app/api/ai/analyze-comment", {
-      comment: text,
-    });
-    return response.data.tone;
-  } catch (error) {
-    console.error("Tone analysis failed:", error.message);
-    return null;
-  }
-};
+
+  const fetchCommentToneSummary = async () => {
+    try {
+      const texts = post.comments.map((c) => c.text); // extract text only
+
+      const response = await axios.post(
+        "https://social-media-app-six-nu.vercel.app/api/ai/comments-tone-summary",
+        {
+          comments: texts,
+        }
+      );
+
+      setCommentSummary(response.data.summary);
+    } catch (error) {
+      console.log("Tone summary fetch error:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (post.comments && post.comments.length > 0) {
+      fetchCommentToneSummary();
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -223,7 +237,55 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
           <Feather name="message-circle" size={22} color="#ccc" />
         </TouchableOpacity>
         <Text style={styles.actionText}>{post.comments.length} Comments</Text>
+
+        {/* 🔄 Toggle comment tone summary */}
+        <TouchableOpacity
+          onPress={() => setShowToneSummary(!showToneSummary)}
+          style={styles.iconBtn}
+        >
+          <Ionicons
+            name={showToneSummary ? "information-circle" : "information-circle-outline"}
+            size={22}
+            color="#ccc"
+          />
+        </TouchableOpacity>
       </View>
+       <View
+  style={{
+    backgroundColor: "#121212",
+    padding: 10,
+    borderRadius: 12,
+    marginVertical: 12,
+    
+    borderColor: "#121212",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  }}
+>
+  {showToneSummary && commentSummary && (
+    <Text
+      style={{
+        fontSize: 13,
+        fontWeight: "600",
+        color:
+          commentSummary === "Positive"
+            ? "#7ed957"
+            : commentSummary === "Neutral"
+            ? "#38bdf8"
+            : "#f87171",
+        textAlign: "center",
+        textShadowColor: "rgba(0, 0, 0, 0.4)",
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 1,
+      }}
+    >
+      Overall Comment Tone: {commentSummary}
+    </Text>
+  )}
+</View>
 
       {/* Comment Input */}
       <View style={styles.commentInputContainer}>
@@ -270,6 +332,7 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
                 </View>
               </View>
             ))}
+           
           </ScrollView>
         </View>
       )}
