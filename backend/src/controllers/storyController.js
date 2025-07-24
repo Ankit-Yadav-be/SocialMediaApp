@@ -67,7 +67,8 @@ export const commentOnStory = async (req, res) => {
     return res.status(400).json({ message: "Comment text is required" });
   }
 
-  const story = await Story.findById(req.params.id);
+  const story = await Story.findById(req.params.id)
+  .populate("user", "name profilePic" );
   if (!story) {
     return res.status(404).json({ message: "Story not found" });
   }
