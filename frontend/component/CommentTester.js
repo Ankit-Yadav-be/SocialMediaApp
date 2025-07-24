@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 6,
     marginBottom: 10,
+    color:"#fff"
   },
   result: {
     marginTop: 20,
