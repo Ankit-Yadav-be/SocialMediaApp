@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,67 +9,84 @@ import {
   ScrollView,
   Modal,
   Pressable,
-} from 'react-native';
-import axios from 'axios';
-import { FontAwesome, Feather, Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Audio } from 'expo-av';
+} from "react-native";
+import axios from "axios";
+import { FontAwesome, Feather, Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio } from "expo-av";
+import { playSound, stopCurrentSound } from "../../utils/soundManager"; // adjust path as needed
 
-const PostCard = ({ post, fetchFeed }) => {
+const PostCard = ({ post, fetchFeed, visiblePostId }) => {
   const [liked, setLiked] = useState(post.likes.includes(post.user._id));
-  const [commentText, setCommentText] = useState('');
+  const [commentText, setCommentText] = useState("");
   const [showAllComments, setShowAllComments] = useState(false);
-  const [shareText, setShareText] = useState('');
+  const [shareText, setShareText] = useState("");
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const router = useRouter();
-  console.log(post.music.title)
- const soundRef = useRef(null);
+
+  const soundRef = useRef(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-useEffect(() => {
-  Audio.setAudioModeAsync({
-    allowsRecordingIOS: false,
-    staysActiveInBackground: false,
-    playsInSilentModeIOS: true,
-    shouldDuckAndroid: true,
-    playThroughEarpieceAndroid: false,
-  });
+  
+  useEffect(() => {
+    return () => {
+      if (soundRef.current && soundRef.current.unloadAsync) {
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, []);
 
-  return () => {
-    if (soundRef.current) {
-      soundRef.current.unloadAsync();
-    }
-  };
-}, []);
+  useEffect(() => {
+    let isCancelled = false;
 
+    const startMusic = async () => {
+      if (post._id !== visiblePostId || !post?.music?.url) return;
 
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+        });
 
-const togglePlayPause = async () => {
-  try {
-  if (!post.music || !post.music.url) {
-  console.log("Music object or URL is missing");
-  return;
-}
+        const sound = await playSound(post.music.url);
 
-
-    if (!soundRef.current) {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: post.music.url },
-        { shouldPlay: true }
-      );
-      soundRef.current = sound;
-      setIsLoaded(true);
-      setIsPlaying(true);
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          setIsPlaying(false);
+        if (!isCancelled && sound) {
+          soundRef.current = sound;
+          setIsLoaded(true);
+          setIsPlaying(true);
         }
-      });
-    } else {
+      } catch (err) {
+        console.error("Audio error:", err.message);
+      }
+    };
+
+    startMusic();
+
+    return () => {
+      isCancelled = true;
+      stopCurrentSound();
+    };
+  }, [visiblePostId]);
+
+  const togglePlayPause = async () => {
+    try {
+      if (!soundRef.current) {
+        console.warn("Sound is not loaded yet");
+        return;
+      }
+
       const status = await soundRef.current.getStatusAsync();
+
+      if (!status.isLoaded) {
+        console.warn("Sound status not loaded");
+        return;
+      }
+
       if (status.isPlaying) {
         await soundRef.current.pauseAsync();
         setIsPlaying(false);
@@ -77,12 +94,10 @@ const togglePlayPause = async () => {
         await soundRef.current.playAsync();
         setIsPlaying(true);
       }
+    } catch (error) {
+      console.error("Toggle play/pause error:", error.message);
     }
-  } catch (error) {
-    console.log("Audio error:", error.message);
-  }
-};
-
+  };
 
   const handleLike = async () => {
     try {
@@ -95,7 +110,7 @@ const togglePlayPause = async () => {
       setLiked(!liked);
       fetchFeed();
     } catch (err) {
-      console.log('Error liking post', err.message);
+      console.log("Error liking post", err.message);
     }
   };
 
@@ -108,11 +123,11 @@ const togglePlayPause = async () => {
         { shareText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setShareText('');
+      setShareText("");
       setShareModalVisible(false);
       fetchFeed();
     } catch (err) {
-      console.log('Error sharing post', err.message);
+      console.log("Error sharing post", err.message);
     }
   };
 
@@ -125,10 +140,10 @@ const togglePlayPause = async () => {
         { text: commentText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setCommentText('');
+      setCommentText("");
       fetchFeed();
     } catch (err) {
-      console.log('Error adding comment', err.message);
+      console.log("Error adding comment", err.message);
     }
   };
 
@@ -136,7 +151,9 @@ const togglePlayPause = async () => {
     <View style={styles.card}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push(`/(screens)/${post.user._id}`)}>
+        <TouchableOpacity
+          onPress={() => router.push(`/(screens)/${post.user._id}`)}
+        >
           <Image source={{ uri: post.user.profilePic }} style={styles.avatar} />
         </TouchableOpacity>
 
@@ -151,7 +168,7 @@ const togglePlayPause = async () => {
           onPress={() => setShareModalVisible(true)}
           style={styles.shareIcon}
         >
-          <Ionicons name="share-social-outline" size={28} color="#fff" />
+          <Ionicons name="share-social-outline" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -162,24 +179,27 @@ const togglePlayPause = async () => {
       <Text style={styles.caption}>{post.caption}</Text>
 
       {/* Music (optional) */}
-   {post.music?.url && (
-  <TouchableOpacity
-    onPress={togglePlayPause}
-    style={styles.audioButton}
-  >
-    <Text style={styles.audioButtonText}>
-      {isPlaying ? '⏸ Pause Music' : `▶️ Play: ${post.music.title || 'Audio Track'}`}
-    </Text>
-  </TouchableOpacity>
-)}
+      {post.music?.url && (
+        <TouchableOpacity
+          onPress={togglePlayPause}
+          style={{ position: "absolute", top: 410, right: 20 }}
+        >
+          <Ionicons
+            name={isPlaying ? "pause-circle-outline" : "play-circle"}
+            size={28}
+            color="#fff"
+            backgroundColor="#171b17ff"
+          />
+        </TouchableOpacity>
+      )}
 
       {/* Actions */}
       <View style={styles.actions}>
         <TouchableOpacity onPress={handleLike} style={styles.iconBtn}>
           {liked ? (
-            <FontAwesome name="heart" size={22} color="#ef4444" />
+            <FontAwesome name="heart" size={20} color="#ef4444" />
           ) : (
-            <FontAwesome name="heart-o" size={22} color="#ccc" />
+            <FontAwesome name="heart-o" size={20} color="#ccc" />
           )}
         </TouchableOpacity>
         <Text style={styles.actionText}>{post.likes.length} Likes</Text>
@@ -218,9 +238,15 @@ const togglePlayPause = async () => {
           >
             {post.comments.map((c, i) => (
               <View key={i} style={styles.commentItem}>
-                <TouchableOpacity onPress={() => { router.push(`/(screens)/${c.user._id}`) }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.push(`/(screens)/${c.user._id}`);
+                  }}
+                >
                   <Image
-                    source={{ uri: c.user?.profilePic || 'https://i.pravatar.cc/300' }}
+                    source={{
+                      uri: c.user?.profilePic || "https://i.pravatar.cc/300",
+                    }}
                     style={styles.commentAvatar}
                   />
                 </TouchableOpacity>
@@ -255,7 +281,10 @@ const togglePlayPause = async () => {
               multiline
             />
             <View style={modalStyles.modalButtons}>
-              <Pressable onPress={() => setShareModalVisible(false)} style={modalStyles.cancelButton}>
+              <Pressable
+                onPress={() => setShareModalVisible(false)}
+                style={modalStyles.cancelButton}
+              >
                 <Text style={modalStyles.buttonText}>Cancel</Text>
               </Pressable>
               <Pressable onPress={handleShare} style={modalStyles.sendButton}>
@@ -273,18 +302,18 @@ export default PostCard;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
     marginVertical: 12,
     marginHorizontal: 0,
     padding: 9,
     borderRadius: 16,
     elevation: 4,
     borderWidth: 1,
-    borderColor: "#383636ff"
+    borderColor: "#383636ff",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
     borderBottomWidth: 1,
     borderBottomLeftRadius: 15,
@@ -298,50 +327,50 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     marginRight: 12,
     borderWidth: 3,
-    borderColor: '#f1f1f1',
+    borderColor: "#f1f1f1",
   },
   username: {
-    fontFamily: 'Outfit-Bold',
+    fontFamily: "Outfit-Bold",
     fontSize: 16,
-    color: '#f1f1f1',
+    color: "#f1f1f1",
   },
   dateText: {
-    fontFamily: 'Outfit-Regular',
+    fontFamily: "Outfit-Regular",
     fontSize: 12,
-    color: '#888',
+    color: "#888",
   },
   postImage: {
-    width: '100%',
+    width: "100%",
     height: 300,
     borderRadius: 12,
     marginVertical: 12,
-    backgroundColor: '#2c2c3e',
+    backgroundColor: "#2c2c3e",
   },
   caption: {
-    fontFamily: 'Outfit-Regular',
+    fontFamily: "Outfit-Regular",
     fontSize: 15,
-    color: '#ddd',
+    color: "#ddd",
     marginBottom: 12,
   },
   actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   actionText: {
-    fontFamily: 'Outfit-Regular',
+    fontFamily: "Outfit-Regular",
     fontSize: 14,
-    color: '#bbb',
+    color: "#bbb",
     marginRight: 16,
   },
   iconBtn: {
     marginRight: 8,
   },
   commentInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1f1f24ff',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1f1f24ff",
     borderRadius: 10,
     paddingHorizontal: 12,
     marginBottom: 10,
@@ -350,23 +379,23 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     fontSize: 14,
-    fontFamily: 'Outfit-Regular',
-    color: '#fff',
+    fontFamily: "Outfit-Regular",
+    color: "#fff",
   },
   sendIcon: {
     paddingLeft: 10,
   },
   commentSection: {
     borderTopWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
     paddingTop: 10,
   },
   commentScrollContainer: {
     maxHeight: 200,
   },
   commentItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     marginBottom: 10,
   },
   commentAvatar: {
@@ -378,65 +407,65 @@ const styles = StyleSheet.create({
   },
   commentContent: {
     flex: 1,
-    backgroundColor: '#1f1f24ff',
+    backgroundColor: "#1f1f24ff",
     borderRadius: 6,
     padding: 8,
   },
   commentText: {
     fontSize: 14,
-    fontFamily: 'Outfit-Regular',
-    color: '#e5e5e5',
+    fontFamily: "Outfit-Regular",
+    color: "#e5e5e5",
   },
   commentUsername: {
-    fontWeight: 'bold',
-    fontFamily: 'Outfit-Bold',
-    color: '#ffffff',
+    fontWeight: "bold",
+    fontFamily: "Outfit-Bold",
+    color: "#ffffff",
   },
   shareIcon: {
-    padding: 6,
-    backgroundColor: '#121212',
+    padding: 8,
+    backgroundColor: "#121212",
     borderRadius: 8,
   },
   audioButton: {
-    backgroundColor: '#4f46e5',
+    backgroundColor: "#4f46e5",
     padding: 10,
     borderRadius: 10,
     marginBottom: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   audioButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontFamily: 'Outfit-Bold',
+    fontFamily: "Outfit-Bold",
   },
 });
 
 const modalStyles = StyleSheet.create({
   modalBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContainer: {
-    backgroundColor: '#1c1c1e',
-    width: '85%',
+    backgroundColor: "#1c1c1e",
+    width: "85%",
     borderRadius: 14,
     padding: 20,
     elevation: 5,
     borderWidth: 1,
-    borderColor: '#888',
+    borderColor: "#888",
   },
   modalTitle: {
     fontSize: 16,
-    color: '#fff',
-    fontFamily: 'Outfit-Bold',
+    color: "#fff",
+    fontFamily: "Outfit-Bold",
     marginBottom: 12,
   },
   modalInput: {
-    backgroundColor: '#2a2a2d',
-    color: '#fff',
-    fontFamily: 'Outfit-Regular',
+    backgroundColor: "#2a2a2d",
+    color: "#fff",
+    fontFamily: "Outfit-Regular",
     padding: 10,
     borderRadius: 10,
     fontSize: 14,
@@ -444,37 +473,36 @@ const modalStyles = StyleSheet.create({
     minHeight: 80,
   },
   modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
   cancelButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
     marginRight: 10,
-    backgroundColor: '#444',
+    backgroundColor: "#444",
     borderRadius: 6,
   },
   sendButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#4f46e5',
+    backgroundColor: "#4f46e5",
     borderRadius: 6,
   },
   buttonText: {
-    color: '#fff',
-    fontFamily: 'Outfit-Bold',
+    color: "#fff",
+    fontFamily: "Outfit-Bold",
   },
   audioButton: {
-  backgroundColor: '#4f46e5',
-  padding: 10,
-  borderRadius: 10,
-  marginBottom: 12,
-  alignItems: 'center',
-},
-audioButtonText: {
-  color: '#fff',
-  fontSize: 14,
-  fontFamily: 'Outfit-Bold',
-},
-
+    backgroundColor: "#4f46e5",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 12,
+    alignItems: "center",
+  },
+  audioButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontFamily: "Outfit-Bold",
+  },
 });

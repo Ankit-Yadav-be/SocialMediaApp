@@ -249,6 +249,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     marginBottom: 30,
+    fontFamily:'Outfit-Bold',
   },
   avatarContainer: {
     position: "relative",
@@ -268,6 +269,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffffff",
     padding: 10,
     borderRadius: 10,
+    
     elevation: 4,
   },
   followBtnText: {
@@ -287,12 +289,14 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#ffffff",
+    fontFamily:'Outfit-Regular',
   },
   bio: {
     fontSize: 14,
     color: "#aaa",
     marginTop: 4,
     textAlign: "center",
+    fontFamily:'Outfit-Regular',
   },
   statsContainer: {
     flexDirection: "row",
@@ -310,6 +314,7 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: "#888",
+    fontFamily:'Outfit-Regular',
   },
   section: {
     backgroundColor: "#1e1e1e",
@@ -322,6 +327,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 12,
     color: "#ccc",
+    fontFamily:'Outfit-Regular',
   },
   detailItem: {
     flexDirection: "row",
@@ -337,6 +343,7 @@ const styles = StyleSheet.create({
   detailText: {
     fontSize: 14,
     color: "#ccc",
+    fontFamily:'Outfit-Regular',
   },
   followerItem: {
     alignItems: "center",
@@ -371,6 +378,7 @@ const styles = StyleSheet.create({
     color: "#ccc",
     fontSize: 14,
     padding: 10,
+    fontFamily:'Outfit-Regular',
   },
   gridItem: {
     backgroundColor: "#2c2c2c",
@@ -403,6 +411,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    fontFamily:'Outfit-Bold',
   },
 
 });

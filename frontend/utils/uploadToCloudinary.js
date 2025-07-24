@@ -66,14 +66,14 @@ export const uploadVideoToCloudinary = async (videoUri) => {
 };
 
 export const uploadAudioToCloudinary = async (audio) => {
-  const cloudName = "dx1libiis"; // ✅ your Cloudinary cloud name
-  const presetName = "socialMediaApp"; // ✅ your unsigned upload preset
-  const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`; // 'video' works for audio too
+  const cloudName = "dx1libiis"; 
+  const presetName = "socialMediaApp"; 
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
 
   const formData = new FormData();
   formData.append("file", {
     uri: audio.uri,
-    type: "audio/mpeg", // or 'audio/mp3' depending on file
+    type: "audio/mpeg", 
     name: "upload.mp3",
   });
   formData.append("upload_preset", presetName);

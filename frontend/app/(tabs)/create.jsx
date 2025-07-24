@@ -167,7 +167,7 @@ export default function CreatePostScreen() {
         <Picker
           selectedValue={selectedMusic}
           onValueChange={(itemValue) => setSelectedMusic(itemValue)}
-          style={{ backgroundColor: "#2c2c2e", color: "#fff", marginBottom: 16 }}
+          style={{ backgroundColor: "#373738ff", color: "#fff", marginBottom: 16, fontFamily: 'Outfit-Bold', }}
           dropdownIconColor="#ccc"
         >
           <Picker.Item label="🎵 Select Music (optional)" value="" />
@@ -244,14 +244,16 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? 50 : 60,
   },
   title: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: "700",
     color: "#fff",
-    marginBottom: 20,
+    marginBottom: 22,
+    fontFamily: 'Outfit-Bold',
+
     textAlign: "center",
   },
   card: {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#202020ff",
     borderRadius: 16,
     padding: 20,
   },
@@ -260,6 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
+    fontFamily: 'Outfit-Regular',
     minHeight: 100,
     textAlignVertical: "top",
     borderColor: "#333",
@@ -279,6 +282,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
     color: "#ccc",
+    fontFamily: 'Outfit-Regular',
   },
   imagePreview: {
     width: "100%",
@@ -291,6 +295,7 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: 12,
     borderColor: "#333",
+    fontFamily: 'Outfit-Regular',
     borderWidth: 1,
     borderStyle: "dashed",
     alignItems: "center",
@@ -303,11 +308,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     borderColor: "#5e5e60ff",
+    fontFamily: 'Outfit-Bold',
     borderWidth: 2,
   },
   postText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
+    fontFamily: 'Outfit-Regular',
   },
 });

@@ -1,25 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   RefreshControl,
   ActivityIndicator,
   StatusBar,
-
+  FlatList,
 } from 'react-native';
 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PostCard from '../../component/home/PostCard';
-
 import AllUsers from '../../component/home/AllUsers';
-
+import Story from "../../component/home/Status"
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [visiblePostId, setVisiblePostId] = useState(null);
+
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 70 }).current;
+
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      setVisiblePostId(viewableItems[0].item._id);
+    }
+  }).current;
 
   const fetchFeed = async () => {
     setLoading(true);
@@ -52,7 +59,6 @@ const HomeScreen = () => {
   };
 
   return (
-
     <View style={styles.container}>
       <StatusBar backgroundColor="#112130ff" barStyle="dark-content" />
       {loading ? (
@@ -67,23 +73,28 @@ const HomeScreen = () => {
           </Text>
         </View>
       ) : (
-        <ScrollView
-          nestedScrollEnabled={true}
+        <FlatList
+          data={posts}
+          keyExtractor={(item) => item._id}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          ListHeaderComponent={
+            <>
+              <AllUsers />
+              <Story />
+              <Text style={styles.feedText}>Your Feed</Text>
+            </>
+          }
+          renderItem={({ item }) => (
+            <PostCard post={item} fetchFeed={fetchFeed} visiblePostId={visiblePostId} />
+          )}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
           contentContainerStyle={styles.scrollContent}
-        >
-          {/* <UserProfile/> */}
-          <AllUsers />
-          <Text style={{color:"#fff", marginLeft:"17",fontFamily:"Outfit-Bold", fontSize:18}}>Your Feed</Text>
-          {posts.map((post) => (
-            <PostCard key={post._id} post={post} />
-          ))}
-        </ScrollView>
+        />
       )}
     </View>
-
   );
 };
 
@@ -92,7 +103,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212', // soft light gray background
+    backgroundColor: '#121212',
     paddingTop: 10,
   },
   scrollContent: {
@@ -121,5 +132,12 @@ const styles = StyleSheet.create({
     color: '#999',
     fontStyle: 'italic',
     paddingHorizontal: 20,
+  },
+  feedText: {
+    color: "#fff",
+    marginLeft: 17,
+    fontFamily: "Outfit-Bold",
+    fontSize: 18,
+    marginBottom: 10
   },
 });
