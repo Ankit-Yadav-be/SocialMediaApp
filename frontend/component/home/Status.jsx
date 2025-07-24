@@ -581,45 +581,66 @@ const [userId, setUserId] = useState(null);
                 >
                   Comments
                 </Text>
+{selectedStory.comments?.map((comment, index) => (
+  <View
+    key={index}
+    style={{
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginBottom: 12,
+      padding: 10,
+      backgroundColor: "#262626",
+      borderRadius: 8,
+      borderLeftWidth: 3,
+      borderLeftColor: "#444",
+    }}
+  >
+    {/* Profile Picture */}
+    <Image
+      source={{
+        uri:
+          comment.user?.profilePic ||
+          "https://via.placeholder.com/40", // fallback image
+      }}
+      style={{
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        marginRight: 10,
+      }}
+    />
 
-                {selectedStory.comments?.map((comment, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      marginBottom: 10,
-                      padding: 10,
-                      backgroundColor: "#262626",
-                      borderRadius: 8,
-                      borderLeftWidth: 3,
-                      borderLeftColor: "#444",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "600",
-                        color: "#fff",
-                        fontSize: 13,
-                        marginBottom: 2,
-                        fontFamily: "Outfit-Regular",
-                      }}
-                    >
-                      {comment.user?.name || "User"}
-                    </Text>
-                    <Text style={{ color: "#ccc", fontSize: 12 }}>
-                      {comment.text}
-                    </Text>
-                    <Text
-                      style={{
-                        color: "#777",
-                        fontSize: 10,
-                        marginTop: 3,
-                        fontStyle: "italic",
-                      }}
-                    >
-                      {moment(comment.createdAt).fromNow()}
-                    </Text>
-                  </View>
-                ))}
+    {/* Comment Content */}
+    <View style={{ flex: 1 }}>
+      <Text
+        style={{
+          fontWeight: "600",
+          color: "#fff",
+          fontSize: 13,
+          fontFamily: "Outfit-Regular",
+        }}
+      >
+        {comment.user?.name || "User"}
+      </Text>
+
+      <Text style={{ color: "#ccc", fontSize: 12 }}>
+        {comment.text}
+      </Text>
+
+      <Text
+        style={{
+          color: "#777",
+          fontSize: 10,
+          marginTop: 3,
+          fontStyle: "italic",
+        }}
+      >
+        {moment(comment.createdAt).fromNow()}
+      </Text>
+    </View>
+  </View>
+))}
+
                 <View style={{ marginTop: 16 }}>
                   <TextInput
                     placeholder="Add a comment..."

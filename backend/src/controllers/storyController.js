@@ -68,7 +68,10 @@ export const commentOnStory = async (req, res) => {
   }
 
   const story = await Story.findById(req.params.id)
-  .populate("user", "name profilePic" );
+  populate({
+    path: "comments.user",
+    select: "name profilePic", // only send necessary fields
+  })
   if (!story) {
     return res.status(404).json({ message: "Story not found" });
   }
