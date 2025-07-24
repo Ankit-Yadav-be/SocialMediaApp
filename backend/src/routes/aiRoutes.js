@@ -12,23 +12,33 @@ router.post("/comments-tone-summary", async (req, res) => {
   }
 
   try {
-    const prompt = `You are a sentiment analysis expert. Analyze the overall tone of the following user comments. Consider whether the tone is generally Positive (e.g., supportive, kind, happy), Neutral (e.g., factual, non-emotional), or Toxic (e.g., hateful, offensive, aggressive).
+    const prompt = `You are an expert sentiment analyst.
 
-Comments:
-${comments.join("\n")}
+Analyze the tone of the following user comments and give:
+1. Overall tone summary: Positive, Neutral, or Toxic
+2. Score-wise breakdown in percentage (e.g., 80% Positive)
+3. Tone-wise percentage distribution (Positive, Neutral, Toxic)
+4. Provide a final summary line based on the majority sentiment
 
-Provide only one of the following as the summary result: "Positive", "Neutral", or "Toxic".
-If the tone is mixed, summarize based on the most dominant tone.
-
-Overall Tone:`;
+Here are the comments:\n\n${comments.join("\n")}\n\nProvide output in JSON format like:
+{
+  "overallTone": "Positive",
+  "score": "80%",
+  "toneBreakdown": {
+    "Positive": "80%",
+    "Neutral": "15%",
+    "Toxic": "5%"
+  },
+  "summary": "Most users shared positive feedback overall."
+}`;
 
     const cohereRes = await axios.post(
       "https://api.cohere.ai/v1/generate",
       {
         model: "command",
         prompt,
-        max_tokens: 20,
-        temperature: 0.3, // lower temp = more focused
+        max_tokens: 200,
+        temperature: 0.4,
       },
       {
         headers: {
@@ -38,8 +48,9 @@ Overall Tone:`;
       }
     );
 
-    const result = cohereRes.data.generations[0].text.trim();
-    res.json({ summary: result });
+    const text = cohereRes.data.generations[0].text.trim();
+    const parsed = JSON.parse(text); // 🔥 Ensure your model gives clean JSON
+    res.json(parsed);
   } catch (err) {
     console.error("Error analyzing tone summary:", err.message);
     res.status(500).json({ error: "AI tone summary failed" });
