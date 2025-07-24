@@ -9,7 +9,7 @@ router.post("/analyze-comment", async (req, res) => {
 
   try {
     const geminiResponse = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyBwoorPsyidngqtUBmRA9QMv0dAkIwCces`,
       {
         contents: [
           {
