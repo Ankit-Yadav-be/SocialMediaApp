@@ -30,6 +30,18 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   
+  const analyzeCommentTone = async (text) => {
+  try {
+    const response = await axios.post("https://social-media-app-six-nu.vercel.app/api/ai/analyze-comment", {
+      comment: text,
+    });
+    return response.data.tone;
+  } catch (error) {
+    console.error("Tone analysis failed:", error.message);
+    return null;
+  }
+};
+
   useEffect(() => {
     return () => {
       if (soundRef.current && soundRef.current.unloadAsync) {
