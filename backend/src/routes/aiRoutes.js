@@ -2,7 +2,7 @@ import express from "express";
 import axios from "axios";
 
 const router = express.Router();
-const GEMINI_API_KEY = "AIzaSyBwoorPsyidngqtUBmRA9QMv0dAkIwCces"; // ideally put in .env
+const GEMINI_API_KEY = "AIzaSyAdCxK4RF9ARL1qGW0eAwj--UXduPkY--8"; // ideally put in .env
 
 router.post("/analyze-comment", async (req, res) => {
   const { comment } = req.body;
