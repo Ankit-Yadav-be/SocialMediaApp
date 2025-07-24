@@ -9,6 +9,7 @@ import notificationRoutes from "./src/routes/notificationRoutes.js"
 import reelsRoutes from "./src/routes/reelRoutes.js"
 import musicRoutes from "./src/routes/musicRoutes.js"
 import storyRoutes from "./src/routes/storyRoutes.js"
+import aiRoutes from "./src/routes/aiRoutes.js"
 const app = express()
 
 dotenv.config();
@@ -28,5 +29,6 @@ app.use("/api/reels", reelsRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/music",musicRoutes);
 app.use("/api/story",storyRoutes);
+app.use("/api/ai", aiRoutes);
 export default app;
 
