@@ -2,14 +2,14 @@ import express from "express";
 import axios from "axios";
 
 const router = express.Router();
-const GEMINI_API_KEY = "AIzaSyBwoorPsyidngqtUBmRA9QMv0dAkIwCces"; // 🔐 replace this
+const GEMINI_API_KEY = "AIzaSyBwoorPsyidngqtUBmRA9QMv0dAkIwCces"; // 🔐 Replace with ENV later
 
 router.post("/analyze-comment", async (req, res) => {
   const { comment } = req.body;
 
   try {
     const geminiResponse = await axios.post(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
       {
         contents: [
           {
