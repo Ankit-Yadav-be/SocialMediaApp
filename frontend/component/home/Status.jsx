@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,397 +8,224 @@ import {
   Dimensions,
   TouchableOpacity,
   Modal,
+  TextInput,
+  Button,
   ScrollView,
-} from 'react-native';
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+  Alert,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { Picker } from "@react-native-picker/picker";
+import { Ionicons } from "@expo/vector-icons";
+import moment from "moment";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import {
+  uploadToCloudinary,
+  uploadVideoToCloudinary,
+} from "../../utils/uploadToCloudinary";
 
-const dummyStatuses = [
-  {
-    id: '1',
-    username: 'ankit_yadav',
-    profilePic: 'https://i.pravatar.cc/300?img=12',
-    song: 'Stay - The Kid LAROI, Justin Bieber',
-    time: '2 hours ago',
-    viewers: [
-      { id: 'v1', name: 'Rahul', avatar: 'https://i.pravatar.cc/300?img=11' },
-      { id: 'v2', name: 'Priya', avatar: 'https://i.pravatar.cc/300?img=22' },
-    ],
-    likes: [
-      { id: 'l1', name: 'Ravi', avatar: 'https://i.pravatar.cc/300?img=24' },
-    ],
-    comments: [
-      {
-        id: 'c1',
-        name: 'Kajal',
-        avatar: 'https://i.pravatar.cc/300?img=26',
-        text: 'Awesome vibe!',
-      },
-    ],
-  },
-  {
-    id: '2',
-    username: 'dark_knight',
-    profilePic: 'https://i.pravatar.cc/300?img=20',
-    song: 'Unstoppable - Sia',
-    time: 'Just now',
-    viewers: [],
-    likes: [],
-    comments: [],
-  },
-];
+const windowWidth = Dimensions.get("window").width;
 
-export default function Status() {
-  const [selectedStory, setSelectedStory] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState('viewers');
+const StatusScreen = () => {
+  const [stories, setStories] = useState([]);
+  const [musicList, setMusicList] = useState([]);
+  const [createModal, setCreateModal] = useState(false);
+  const [selectedMusic, setSelectedMusic] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [fileType, setFileType] = useState("image");
+  const [caption, setCaption] = useState("");
 
-  const openModal = (story) => {
-    setSelectedStory(story);
-    setActiveTab('viewers');
-    setModalVisible(true);
-  };
-
+  const openCreateModal = () => setCreateModal(true);
   const closeModal = () => {
-    setModalVisible(false);
-    setSelectedStory(null);
+    setCreateModal(false);
+    setPreview(null);
+    setCaption("");
+    setSelectedMusic(null);
   };
 
-  const renderUserRow = (user) => (
-    <View key={user.id} style={styles.viewerRow}>
-      <Image source={{ uri: user.avatar }} style={styles.viewerAvatar} />
-      <Text style={styles.viewerName}>{user.name}</Text>
+  const fetchStories = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const res = await axios.get("https://social-media-app-six-nu.vercel.app/api/story",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setStories(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchMusic = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const res = await axios.get("https://social-media-app-six-nu.vercel.app/api/music",
+         {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMusicList(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStories();
+    fetchMusic();
+  }, []);
+
+  const pickMedia = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      setPreview(asset.uri);
+      setFileType(asset.type || "image");
+    }
+  };
+
+ const submitStory = async () => {
+  try {
+    if (!preview) return Alert.alert("Select image or video first");
+
+    let uploadedUrl;
+    if (fileType === "image") {
+      uploadedUrl = await uploadToCloudinary({ uri: preview });
+    } else {
+      uploadedUrl = await uploadVideoToCloudinary(preview);
+    }
+
+    if (!uploadedUrl) return Alert.alert("Upload failed", "Try again");
+
+    const token = await AsyncStorage.getItem("token");
+    const res = await axios.post(
+      "https://social-media-app-six-nu.vercel.app/api/story",
+      {
+        media: uploadedUrl,
+        mediaType: fileType, // either 'image' or 'video'
+        caption,
+        musicId: selectedMusic,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setStories([res.data.story, ...stories]);
+    closeModal();
+  } catch (err) {
+    console.error("Story Submit Error:", err);
+    Alert.alert("Error", "Something went wrong while submitting your story.");
+  }
+};
+
+  const renderItem = ({ item }) => (
+    <View style={styles.storyCard}>
+      <Image source={{ uri: item.video }} style={styles.image} />
+      <Text style={styles.caption}>{item.caption}</Text>
+      <Text style={styles.song}>{item.music ? item.music.title : "No Song"}</Text>
+      <Text style={styles.date}>{moment(item.createdAt).fromNow()}</Text>
     </View>
   );
-
- const renderCommentRow = (comment) => (
-  <View key={comment.id} style={styles.viewerRow}>
-    <Image source={{ uri: comment.avatar }} style={styles.viewerAvatar} />
-    <View>
-      <Text style={[styles.viewerName, { fontWeight: '600', fontSize: 15 }]}>
-        {comment.name}
-      </Text>
-      <Text style={styles.commentText}>“{comment.text}”</Text>
-    </View>
-  </View>
-);
-
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Stories</Text>
-
       <FlatList
-        data={dummyStatuses}
-        keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => openModal(item)} style={styles.storyCard}>
-            <Image source={{ uri: item.profilePic }} style={styles.bigAvatar} />
-            <View style={styles.overlay} />
-            <View style={styles.details}>
-              <Text style={styles.username}>{item.username}</Text>
-              <View style={styles.songRow}>
-                <FontAwesome5 name="music" size={14} color="#ccc" />
-                <Text style={styles.song}>{item.song}</Text>
-              </View>
-              <Text style={styles.time}>{item.time}</Text>
-            </View>
+        data={stories}
+        keyExtractor={(item) => item._id}
+        numColumns={2}
+        ListHeaderComponent={() => (
+          <TouchableOpacity onPress={openCreateModal} style={styles.newStoryCard}>
+            <Ionicons name="add" size={40} color="#fff" />
+            <Text style={styles.newStoryText}>Add Story</Text>
           </TouchableOpacity>
         )}
+        renderItem={renderItem}
       />
 
-      {/* Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={closeModal}>
-  <View style={styles.modalContainer}>
-    <View style={styles.modalCard}>
-      <LinearGradient colors={['rgba(31,31,31,0.8)', 'rgba(0,0,0,0.95)']} style={styles.modalHeaderGradient}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>
-            <Text style={{ color: '#a78bfa' }}>{selectedStory?.username}</Text>
-            <Text style={{ color: '#fff' }}>’s Story</Text>
-          </Text>
-          <TouchableOpacity onPress={closeModal} style={styles.closeBtn}>
-            <Ionicons name="close" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-
-      <View style={styles.tabBar}>
-        {['viewers', 'likes', 'comments'].map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={[
-              styles.tabButton,
-              activeTab === tab && styles.activeTabButton,
-            ]}
-            onPress={() => setActiveTab(tab)}
-          >
-            <Ionicons
-              name={
-                tab === 'viewers' ? 'eye' : tab === 'likes' ? 'heart' : 'chatbubble'
-              }
-              size={16}
-              color="#fff"
-              style={{ marginBottom: 4 }}
+      <Modal visible={createModal} transparent animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Create Story</Text>
+            <Picker selectedValue={selectedMusic} onValueChange={setSelectedMusic}>
+              <Picker.Item label="No music" value={null} />
+              {musicList.map((m) => (
+                <Picker.Item key={m._id} label={m.title} value={m._id} />
+              ))}
+            </Picker>
+            <Button title="Pick Image/Video" onPress={pickMedia} />
+            {preview && <Image source={{ uri: preview }} style={styles.preview} />}
+            <TextInput
+              placeholder="Caption..."
+              value={caption}
+              onChangeText={setCaption}
+              style={styles.captionInput}
             />
-            <Text style={styles.tabText}>{tab}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <ScrollView style={styles.scrollArea}>
-        {activeTab === 'viewers' &&
-          (selectedStory?.viewers.length > 0 ? (
-            selectedStory.viewers.map(renderUserRow)
-          ) : (
-            <Text style={styles.noViewer}>No viewers yet 👀</Text>
-          ))}
-        {activeTab === 'likes' &&
-          (selectedStory?.likes.length > 0 ? (
-            selectedStory.likes.map(renderUserRow)
-          ) : (
-            <Text style={styles.noViewer}>No likes yet ❤️</Text>
-          ))}
-        {activeTab === 'comments' &&
-          (selectedStory?.comments.length > 0 ? (
-            selectedStory.comments.map(renderCommentRow)
-          ) : (
-            <Text style={styles.noViewer}>No comments yet 💬</Text>
-          ))}
-      </ScrollView>
-    </View>
-  </View>
-</Modal>
-
+            <Button title="Submit" onPress={submitStory} />
+            <Button title="Cancel" onPress={closeModal} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
-}
-
-const { width } = Dimensions.get('window');
+};
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#111',
-    paddingVertical: 20,
+  container: { flex: 1, padding: 10 },
+  newStoryCard: {
+    width: windowWidth / 2 - 20,
+    height: 180,
+    backgroundColor: "#888",
+    margin: 5,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  header: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 16,
-    paddingHorizontal: 16,
-  },
+  newStoryText: { color: "#fff", marginTop: 10 },
   storyCard: {
-    width: width * 0.6,
-    height: 300,
-    backgroundColor: '#1f1f1f',
-    borderRadius: 20,
-    marginRight: 16,
-    overflow: 'hidden',
-    shadowColor: '#6b21a8',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    width: windowWidth / 2 - 20,
+    height: 180,
+    backgroundColor: "#eee",
+    margin: 5,
+    borderRadius: 15,
+    overflow: "hidden",
   },
-  bigAvatar: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-  },
-  details: {
-    position: 'absolute',
-    bottom: 12,
-    left: 12,
-    right: 12,
-  },
-  username: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  songRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  song: {
-    color: '#ccc',
-    fontSize: 13,
-    marginLeft: 6,
-  },
-  time: {
-    color: '#aaa',
-    fontSize: 12,
-    marginTop: 4,
-  },
+  image: { width: "100%", height: 100 },
+  caption: { padding: 5, fontWeight: "bold" },
+  song: { paddingLeft: 5, fontStyle: "italic", color: "#666" },
+  date: { paddingLeft: 5, fontSize: 12, color: "#999" },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
-  modalContent: {
-    width: width * 0.9,
-    backgroundColor: '#1a1a1a',
-    borderRadius: 18,
-    overflow: 'hidden',
-    paddingBottom: 10,
-    maxHeight: '80%',
+  modalCard: {
+    backgroundColor: "#fff",
+    margin: 20,
+    padding: 15,
+    borderRadius: 10,
   },
-  modalHeaderGradient: {
-    padding: 14,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  tabBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 12,
-  },
-  tabButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: '#2d2d2d',
-  },
-  activeTabButton: {
-    backgroundColor: '#9333ea',
-  },
-  tabText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  viewerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
+  preview: { width: "100%", height: 150, marginTop: 10 },
+  captionInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
     marginVertical: 10,
-    paddingHorizontal: 14,
+    padding: 8,
+    borderRadius: 5,
   },
-  viewerAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginRight: 12,
-  },
-  viewerName: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  commentText: {
-    color: '#ccc',
-    fontSize: 14,
-    marginTop: 2,
-  },
-  noViewer: {
-    color: '#888',
-    textAlign: 'center',
-    marginTop: 30,
-    fontSize: 15,
-  },
-  scrollArea: {
-    paddingBottom: 20,
-  },
-  modalContainer: {
-  flex: 1,
-  backgroundColor: 'rgba(0,0,0,0.85)',
-  justifyContent: 'flex-end',
-},
-
-modalCard: {
-  backgroundColor: '#1e1e1f',
-  borderTopLeftRadius: 26,
-  borderTopRightRadius: 26,
-  overflow: 'hidden',
-  maxHeight: '82%',
-  width: '100%',
-  shadowColor: '#000',
-  shadowOpacity: 0.25,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: -2 },
-},
-
-modalHeaderGradient: {
-  paddingTop: 18,
-  paddingHorizontal: 20,
-  paddingBottom: 12,
-  borderTopLeftRadius: 26,
-  borderTopRightRadius: 26,
-},
-
-modalHeader: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-},
-
-modalTitle: {
-  fontSize: 18,
-  fontWeight: 'bold',
-  color: '#fff',
-},
-
-closeBtn: {
-  backgroundColor: 'rgba(255,255,255,0.1)',
-  borderRadius: 20,
-  padding: 6,
-},
-
-tabBar: {
-  flexDirection: 'row',
-  justifyContent: 'space-around',
-  paddingVertical: 10,
-  borderTopWidth: 1,
-  borderTopColor: '#2f2f2f',
-  borderBottomWidth: 1,
-  borderBottomColor: '#2f2f2f',
-  backgroundColor: '#181818',
-},
-
-tabButton: {
-  alignItems: 'center',
-  flex: 1,
-  paddingVertical: 10,
-  marginHorizontal: 6,
-  borderRadius: 14,
-  backgroundColor: '#2b2b2b',
-},
-
-activeTabButton: {
-  backgroundColor: '#7c3aed',
-  shadowColor: '#7c3aed',
-  shadowOpacity: 0.35,
-  shadowRadius: 6,
-},
-
-tabText: {
-  color: '#fff',
-  fontSize: 12,
-  fontWeight: '600',
-},
-
-noViewer: {
-  textAlign: 'center',
-  color: '#999',
-  fontSize: 15,
-  paddingVertical: 40,
-  fontStyle: 'italic',
-},
-
 });
+
+export default StatusScreen;

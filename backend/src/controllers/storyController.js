@@ -2,23 +2,30 @@ import Story from "../models/storyModel.js";
 
 // ✅ 1. Create a new story
 export const createStory = async (req, res) => {
-  const { media, mediaType, caption, music } = req.body;
+  const { media, mediaType, caption, musicId } = req.body;
   const userId = req.user._id;
 
   if (!media || !mediaType) {
-    return res.status(400).json({ message: "Media and media type are required" });
+    return res.status(400).json({ message: "Media and mediaType are required" });
   }
 
-  const story = await Story.create({
-    user: userId,
-    media,
-    mediaType,
-    caption,
-    music: music || null,
-  });
+  try {
+    const story = await Story.create({
+      user: userId,
+      media,
+      mediaType,
+      caption,
+      music: musicId || null,
+    });
 
-  res.status(201).json(story);
+    res.status(201).json({ story });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create story", error: error.message });
+  }
 };
+
+
+
 
 // ✅ 2. Get all active stories (not expired)
 export const getAllStories = async (req, res) => {
