@@ -137,72 +137,67 @@ export default function UserProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeContainer}>
-      <Modal
-        visible={editProfileVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setEditProfileVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Profile</Text>
+     <Modal
+  visible={editProfileVisible}
+  transparent
+  animationType="slide"
+  onRequestClose={() => setEditProfileVisible(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>Edit Your Profile</Text>
 
-            <TouchableOpacity onPress={handleImagePick}>
-              <Image
-                source={{ uri: imageInput }}
-                style={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: 50,
-                  alignSelf: "center",
-                  marginBottom: 16,
-                }}
-              />
-              <Text style={{ color: "#fff", textAlign: "center" }}>
-                Change Profile Picture
-              </Text>
-            </TouchableOpacity>
-
-            <TextInput
-              placeholder="Name"
-              value={nameInput}
-              onChangeText={setNameInput}
-              style={inputStyles}
-              placeholderTextColor="#999"
-            />
-            <TextInput
-              placeholder="Bio"
-              value={bioInput}
-              onChangeText={setBioInput}
-              style={inputStyles}
-              placeholderTextColor="#999"
-              multiline
-            />
-
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={handleUpdateProfile}
-              disabled={uploading}
-            >
-              {uploading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.closeButtonText}>Save Changes</Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setEditProfileVisible(false)}
-              style={[
-                styles.closeButton,
-                { backgroundColor: "#444", marginTop: 10 },
-              ]}
-            >
-              <Text style={styles.closeButtonText}>Cancel</Text>
-            </TouchableOpacity>
+      <TouchableOpacity onPress={handleImagePick}>
+        <View style={styles.profilePicWrapper}>
+          <Image
+            source={{ uri: imageInput }}
+            style={styles.profilePic}
+          />
+          <View style={styles.editIcon}>
+            <Text style={{ color: "#fff", fontSize: 18 }}>📷</Text>
           </View>
         </View>
-      </Modal>
+        <Text style={styles.chooseText}>Tap to change profile picture</Text>
+      </TouchableOpacity>
+
+      <TextInput
+        placeholder="Your Name"
+        value={nameInput}
+        onChangeText={setNameInput}
+        style={styles.input}
+        placeholderTextColor="#ccc"
+      />
+      <TextInput
+        placeholder="Your Bio"
+        value={bioInput}
+        onChangeText={setBioInput}
+        style={[styles.input, { height: 100 }]}
+        placeholderTextColor="#ccc"
+        multiline
+      />
+
+      <TouchableOpacity
+        style={styles.saveButton}
+        onPress={handleUpdateProfile}
+        disabled={uploading}
+      >
+        {uploading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.saveButtonText}> Save Changes</Text>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => setEditProfileVisible(false)}
+        style={styles.cancelButton}
+      >
+        <Text style={styles.saveButtonText}> Cancel</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
 
       <Modal
         visible={isSidebarVisible}
@@ -244,10 +239,13 @@ export default function UserProfileScreen() {
                   👤 <Text style={styles.modalLabel}>Name:</Text> {user?.name}
                 </Text>
                 <Text style={styles.modalItem}>
-                  📧 <Text style={styles.modalLabel}>Email:</Text> {user?.email}
+                  <Text style={styles.modalLabel}>Email:</Text> {user?.email}
                 </Text>
                 <Text style={styles.modalItem}>
-                  📅 <Text style={styles.modalLabel}>Joined:</Text>{" "}
+                  <Text style={styles.modalLabel}>Bio:</Text> {user?.bio}
+                </Text>
+                <Text style={styles.modalItem}>
+                  <Text style={styles.modalLabel}>Joined:</Text>{" "}
                   {new Date(user?.createdAt).toDateString()}
                 </Text>
                 <TouchableOpacity
@@ -270,9 +268,7 @@ export default function UserProfileScreen() {
             <View>
               <TouchableOpacity
                 style={styles.editBtnIcon}
-                onPress={() =>
-                  Alert.alert("Coming Soon", "Edit Profile Feature")
-                }
+                onPress={() => setEditProfileVisible(true)}
               >
                 <Feather name="edit" size={19} color="#fff" />
               </TouchableOpacity>
@@ -520,9 +516,10 @@ const styles = StyleSheet.create({
   logoutBtnIcon: {
     position: "absolute",
     right: -105,
-    top: -110,
+    top: -90,
     backgroundColor: "#141212ff",
     padding: 5,
+    borderWidth: 0,
     borderColor: "#fff",
     elevation: 4,
   },
@@ -540,13 +537,13 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
   },
   name: {
-    fontSize: 22,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#ffffff",
     fontFamily: "Outfit-Regular",
   },
   bio: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#aaa",
     marginTop: 4,
     textAlign: "center",
@@ -676,12 +673,14 @@ const styles = StyleSheet.create({
 
   sidebar: {
     width: "70%",
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#121111ff",
     height: "100%",
     padding: 20,
     shadowColor: "#000",
     shadowOffset: { width: -2, height: 0 },
     shadowOpacity: 0.4,
+    borderRightWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
     shadowRadius: 4,
     elevation: 5,
   },
@@ -724,7 +723,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     color: "#fff",
     marginBottom: 20,
     fontFamily: "Outfit-Bold",
@@ -732,7 +731,7 @@ const styles = StyleSheet.create({
   },
   modalItem: {
     color: "#ccc",
-    fontSize: 16,
+    fontSize: 15,
     marginBottom: 12,
     fontFamily: "Outfit-Regular",
   },
@@ -752,7 +751,91 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Outfit-Bold",
   },
-  
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: 'rgba(30,30,30,0.95)',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  profilePicWrapper: {
+    alignSelf: 'center',
+    position: 'relative',
+    marginBottom: 10,
+    borderRadius: 60,
+    padding: 4,
+    backgroundColor: '#333',
+    borderWidth: 2,
+    borderColor: 'linear-gradient(45deg, #6a11cb, #2575fc)', // you can use expo-linear-gradient for real gradient
+  },
+  profilePic: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  editIcon: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#444',
+    padding: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#888',
+  },
+  chooseText: {
+    color: "#aaa",
+    textAlign: "center",
+    marginBottom: 15,
+  },
+  input: {
+    backgroundColor: '#222',
+    color: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#444',
+    marginBottom: 15,
+  },
+  saveButton: {
+    backgroundColor: '#6a11cb',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#444',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
 });
 
 const inputStyles = {

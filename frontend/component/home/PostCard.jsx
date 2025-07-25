@@ -27,8 +27,8 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [commentSummary, setCommentSummary] = useState(null);
   const [showToneSummary, setShowToneSummary] = useState(false); // 🔄 New toggle state
-  
-  
+
+
   const router = useRouter();
 
   const soundRef = useRef(null);
@@ -47,7 +47,7 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
         }
       );
 
-    setCommentSummary(response.data); 
+      setCommentSummary(response.data);
 
     } catch (error) {
       console.log("Tone summary fetch error:", error.message);
@@ -55,10 +55,11 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
   };
 
   useEffect(() => {
-    if (post.comments && post.comments.length > 0) {
-      fetchCommentToneSummary();
-    }
-  }, []);
+  if (showToneSummary && post.comments?.length > 0) {
+    fetchCommentToneSummary();
+  }
+}, [showToneSummary]);
+
 
   useEffect(() => {
     return () => {
@@ -218,7 +219,7 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
             name={isPlaying ? "pause-circle-outline" : "play-circle"}
             size={28}
             color="#fff"
-           
+
           />
         </TouchableOpacity>
       )}
@@ -254,57 +255,57 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
           />
         </TouchableOpacity>
       </View>
-       <View
-  style={{
-    backgroundColor: "#121212",
-    padding: 10,
-    borderRadius: 12,
-    marginVertical: 12,
-    
-    borderColor: "#121212",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-  }}
->
-{showToneSummary && commentSummary && (
-  <View style={{
-    backgroundColor: "#1f2937",
-    padding: 12,
-    borderRadius: 10,
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: "#4b5563",
-  }}>
-    <Text style={{
-      fontSize: 14,
-      fontWeight: "bold",
-      color:
-        commentSummary.overallTone === "Positive"
-          ? "#7ed957"
-          : commentSummary.overallTone === "Neutral"
-          ? "#38bdf8"
-          : "#f87171",
-      marginBottom: 8,
-      textAlign: "center",
-    }}>
-      Overall Tone: {commentSummary.overallTone}
-    </Text>
+      <View
+        style={{
+          backgroundColor: "#121212",
+          padding: 10,
+          borderRadius: 12,
+          marginVertical: 12,
 
-    <Text style={toneStyles.text}>Score: {commentSummary.score}</Text>
-    <Text style={toneStyles.text}>Positive: {commentSummary.toneBreakdown?.Positive}</Text>
-    <Text style={toneStyles.text}>Neutral: {commentSummary.toneBreakdown?.Neutral}</Text>
-    <Text style={toneStyles.text}>Toxic: {commentSummary.toneBreakdown?.Toxic}</Text>
+          borderColor: "#121212",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.3,
+          shadowRadius: 5,
+          elevation: 5,
+        }}
+      >
+        {showToneSummary && commentSummary && (
+          <View style={{
+            backgroundColor: "#1f2937",
+            padding: 12,
+            borderRadius: 10,
+            marginVertical: 10,
+            borderWidth: 1,
+            borderColor: "#4b5563",
+          }}>
+            <Text style={{
+              fontSize: 14,
+              fontWeight: "bold",
+              color:
+                commentSummary.overallTone === "Positive"
+                  ? "#7ed957"
+                  : commentSummary.overallTone === "Neutral"
+                    ? "#38bdf8"
+                    : "#f87171",
+              marginBottom: 8,
+              textAlign: "center",
+            }}>
+              Overall Tone: {commentSummary.overallTone}
+            </Text>
 
-    <Text style={[toneStyles.text, { marginTop: 8, fontStyle: "italic", color: "#d1d5db" }]}>
-      "{commentSummary.summary}"
-    </Text>
-  </View>
-)}
+            <Text style={toneStyles.text}>Score: {commentSummary.score}</Text>
+            <Text style={toneStyles.text}>Positive: {commentSummary.toneBreakdown?.Positive}</Text>
+            <Text style={toneStyles.text}>Neutral: {commentSummary.toneBreakdown?.Neutral}</Text>
+            <Text style={toneStyles.text}>Toxic: {commentSummary.toneBreakdown?.Toxic}</Text>
 
-</View>
+            <Text style={[toneStyles.text, { marginTop: 8, fontStyle: "italic", color: "#d1d5db" }]}>
+              "{commentSummary.summary}"
+            </Text>
+          </View>
+        )}
+
+      </View>
 
       {/* Comment Input */}
       <View style={styles.commentInputContainer}>
@@ -351,7 +352,7 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
                 </View>
               </View>
             ))}
-           
+
           </ScrollView>
         </View>
       )}
@@ -416,11 +417,12 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
     borderRadius: 24,
+    padding: 20,
     marginRight: 12,
-    borderWidth: 3,
+    borderWidth: 1,
     borderColor: "#f1f1f1",
   },
   username: {

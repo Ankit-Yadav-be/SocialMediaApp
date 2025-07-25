@@ -2,8 +2,14 @@ import { Audio } from 'expo-av';
 
 let currentSound = null;
 
+let isSoundLoading = false;
+
 export const playSound = async (url) => {
   try {
+    if (isSoundLoading) return;
+
+    isSoundLoading = true;
+
     if (currentSound) {
       await currentSound.unloadAsync();
       currentSound = null;
@@ -12,8 +18,11 @@ export const playSound = async (url) => {
     const { sound } = await Audio.Sound.createAsync({ uri: url });
     currentSound = sound;
     await sound.playAsync();
-    return sound; // ✅ return sound so PostCard can control it
+
+    isSoundLoading = false;
+    return sound;
   } catch (error) {
+    isSoundLoading = false;
     console.error("Sound play error:", error);
     return null;
   }
