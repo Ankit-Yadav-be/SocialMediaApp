@@ -20,7 +20,9 @@ import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Video } from "expo-av";
-import jwt_decode from "jwt-decode"; // ✅ ES6
+import jwtDecode from 'jwt-decode';
+ // ✅ This works with CommonJS or mixed modules
+
 
 
 import {
@@ -52,21 +54,25 @@ const [userId, setUserId] = useState(null);
     setSelectedMusic(null);
   };
 
-  useEffect(() => {
+ useEffect(() => {
     const extractUserIdFromToken = async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (token) {
-        try {
-          const decoded = jwt_decode(token);
-          setUserId(decoded._id); // ✅ correctly referencing _id
-        } catch (error) {
-          console.error("Invalid token", error);
+      try {
+        const token = await AsyncStorage.getItem("token");
+        console.log("Fetched token:", token);
+        if (token) {
+          const decoded = jwtDecode(token);
+          console.log("Decoded token:", decoded);
+          setUserId(decoded._id);
         }
+      } catch (err) {
+        console.error("Token decode error:", err);
       }
     };
 
     extractUserIdFromToken();
   }, []);
+
+
 
   const handleComment = async (storyId) => {
     if (!commentText.trim()) return;
@@ -238,7 +244,6 @@ const [userId, setUserId] = useState(null);
         <Image source={{ uri: item.media }} style={styles.image} />
       )}
 
-      <Text style={styles.caption}>{item.caption}</Text>
       {item.music ? (
         <TouchableOpacity
           style={styles.songButton}
@@ -270,7 +275,7 @@ const [userId, setUserId] = useState(null);
             onPress={openCreateModal}
             style={styles.newStoryCard}
           >
-            <Ionicons name="add" size={40} color="#fff" />
+            <Ionicons name="add" size={25} color="#fff" />
             <Text style={styles.newStoryText}>Add Story</Text>
           </TouchableOpacity>
         )}
@@ -717,8 +722,8 @@ const [userId, setUserId] = useState(null);
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 0 },
   newStoryCard: {
-    width: windowWidth / 2 - 20,
-    height: 190,
+    width: windowWidth / 3 - 20,
+    height: 130,
     margin: 4,
     borderRadius: 20,
     backgroundColor: "#1E1E1E", // deeper dark tone
@@ -735,17 +740,17 @@ const styles = StyleSheet.create({
     gap: 4, // requires React Native >=0.71
   },
 
-  newStoryText: { color: "#fff", marginTop: 10, fontFamily: "Outfit-Regular" },
+  newStoryText: { color: "#fff", marginTop: 5, fontFamily: "Outfit-Regular",fontSize:10 },
   storyCard: {
-    width: windowWidth / 2 - 20,
-    height: 200,
-    margin: 6,
+    width: windowWidth / 3 - 20,
+    height: 130,
+    margin: 4,
     borderRadius: 15,
     overflow: "hidden",
     paddingBottom: 15,
   },
-  image: { width: "100%", height: 130 },
-  caption: { fontWeight: "bold", fontFamily: "Outfit-Bold" },
+  image: { width: "100%", height: 85 },
+  
   songButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -756,9 +761,10 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "rgba(243, 243, 243, 0.76)",
     fontFamily: "Outfit-Regular",
+    fontSize:10
   },
   date: {
-    paddingLeft: 8,
+    paddingLeft: 3,
     fontSize: 12,
     color: "rgba(186, 184, 184, 0.6)",
     fontFamily: "Outfit-Regular",

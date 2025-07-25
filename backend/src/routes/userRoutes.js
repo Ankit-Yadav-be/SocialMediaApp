@@ -9,6 +9,7 @@ import {
   getFollowing,
   getUsersProfile,
   getAllUsers,
+  updateProfile,
 } from "../controllers/userController.js";
 
 router.get("/", protect, getUsersProfile);
@@ -18,5 +19,6 @@ router.put("/:id/follow", protect, followUser);
 router.put("/:id/unfollow", protect, unfollowUser);
 router.get("/:id/followers", protect, getFollowers);
 router.get("/:id/following", protect, getFollowing);
+router.put("/update-profile", protect, updateProfile);
 
 export default router;

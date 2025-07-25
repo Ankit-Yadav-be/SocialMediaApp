@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginLeft: 17,
     fontFamily: "Outfit-Bold",
-    fontSize: 18,
-    marginBottom: 10
+    fontSize: 15,
+    paddingTop:10
   },
 });

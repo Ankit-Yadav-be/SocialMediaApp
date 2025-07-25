@@ -15,7 +15,9 @@ import { FontAwesome, Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
-import { playSound, stopCurrentSound } from "../../utils/soundManager"; // adjust path as needed
+import { playSound, stopCurrentSound } from "../../utils/soundManager";
+
+
 
 const PostCard = ({ post, fetchFeed, visiblePostId }) => {
   const [liked, setLiked] = useState(post.likes.includes(post.user._id));
@@ -25,7 +27,8 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const [commentSummary, setCommentSummary] = useState(null);
   const [showToneSummary, setShowToneSummary] = useState(false); // 🔄 New toggle state
-
+  
+  
   const router = useRouter();
 
   const soundRef = useRef(null);
@@ -44,7 +47,8 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
         }
       );
 
-      setCommentSummary(response.data.summary);
+    setCommentSummary(response.data); 
+
     } catch (error) {
       console.log("Tone summary fetch error:", error.message);
     }
@@ -214,7 +218,7 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
             name={isPlaying ? "pause-circle-outline" : "play-circle"}
             size={28}
             color="#fff"
-            backgroundColor="#171b17ff"
+           
           />
         </TouchableOpacity>
       )}
@@ -265,26 +269,41 @@ const PostCard = ({ post, fetchFeed, visiblePostId }) => {
     elevation: 5,
   }}
 >
-  {showToneSummary && commentSummary && (
-    <Text
-      style={{
-        fontSize: 13,
-        fontWeight: "600",
-        color:
-          commentSummary === "Positive"
-            ? "#7ed957"
-            : commentSummary === "Neutral"
-            ? "#38bdf8"
-            : "#f87171",
-        textAlign: "center",
-        textShadowColor: "rgba(0, 0, 0, 0.4)",
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 1,
-      }}
-    >
-      Overall Comment Tone: {commentSummary}
+{showToneSummary && commentSummary && (
+  <View style={{
+    backgroundColor: "#1f2937",
+    padding: 12,
+    borderRadius: 10,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: "#4b5563",
+  }}>
+    <Text style={{
+      fontSize: 14,
+      fontWeight: "bold",
+      color:
+        commentSummary.overallTone === "Positive"
+          ? "#7ed957"
+          : commentSummary.overallTone === "Neutral"
+          ? "#38bdf8"
+          : "#f87171",
+      marginBottom: 8,
+      textAlign: "center",
+    }}>
+      Overall Tone: {commentSummary.overallTone}
     </Text>
-  )}
+
+    <Text style={toneStyles.text}>Score: {commentSummary.score}</Text>
+    <Text style={toneStyles.text}>Positive: {commentSummary.toneBreakdown?.Positive}</Text>
+    <Text style={toneStyles.text}>Neutral: {commentSummary.toneBreakdown?.Neutral}</Text>
+    <Text style={toneStyles.text}>Toxic: {commentSummary.toneBreakdown?.Toxic}</Text>
+
+    <Text style={[toneStyles.text, { marginTop: 8, fontStyle: "italic", color: "#d1d5db" }]}>
+      "{commentSummary.summary}"
+    </Text>
+  </View>
+)}
+
 </View>
 
       {/* Comment Input */}
@@ -378,19 +397,19 @@ export default PostCard;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#121212",
-    marginVertical: 12,
+    marginVertical: 9,
     marginHorizontal: 0,
     padding: 9,
     borderRadius: 16,
     elevation: 4,
-    borderWidth: 1,
+    borderWidth: 3,
     borderColor: "#383636ff",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     borderColor: "#585757ff",
@@ -406,7 +425,7 @@ const styles = StyleSheet.create({
   },
   username: {
     fontFamily: "Outfit-Bold",
-    fontSize: 16,
+    fontSize: 14,
     color: "#f1f1f1",
   },
   dateText: {
@@ -416,10 +435,10 @@ const styles = StyleSheet.create({
   },
   postImage: {
     width: "100%",
-    height: 300,
+    height: 370,
     borderRadius: 12,
-    marginVertical: 12,
-    backgroundColor: "#2c2c3e",
+    marginVertical: 0,
+    backgroundColor: "#16161aff",
   },
   caption: {
     fontFamily: "Outfit-Regular",
@@ -580,4 +599,16 @@ const modalStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Outfit-Bold",
   },
+
 });
+
+const toneStyles = StyleSheet.create({
+  text: {
+    color: "#f1f1f1",
+    fontSize: 13,
+    fontFamily: "Outfit-Regular",
+    marginVertical: 1,
+    textAlign: "center",
+  },
+});
+

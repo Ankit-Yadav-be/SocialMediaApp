@@ -136,3 +136,47 @@ export const getFollowing = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+
+
+export const updateProfile = async (req, res) => {
+  const userId = req.user.id; // from auth middleware
+  const { name, username, email, bio, profilePic } = req.body;
+
+  try {
+    // Check for username/email conflict if changed
+    const existingUsername = await User.findOne({ username, _id: { $ne: userId } });
+    if (existingUsername) {
+      return res.status(400).json({ error: "Username already taken" });
+    }
+
+    const existingEmail = await User.findOne({ email, _id: { $ne: userId } });
+    if (existingEmail) {
+      return res.status(400).json({ error: "Email already in use" });
+    }
+
+    // Update allowed fields
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          name,
+          username,
+          email,
+          bio,
+          profilePic,
+        },
+      },
+      { new: true }
+    ).select("-password");
+
+    res.json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error.message);
+    res.status(500).json({ error: "Server error while updating profile" });
+  }
+};

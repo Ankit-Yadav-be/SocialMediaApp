@@ -8,9 +8,12 @@ const AICommentTester = () => {
 
   const analyzeComment = async () => {
     try {
-      const res = await axios.post("https://social-media-app-six-nu.vercel.app/api/ai/analyze-comment", {
-        comment,
-      });
+      const res = await axios.post(
+        "https://social-media-app-six-nu.vercel.app/api/ai/analyze-comment",
+        {
+          comment,
+        }
+      );
       setTone(res.data.tone);
     } catch (err) {
       console.error("Analysis failed", err);
@@ -41,7 +44,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 6,
     marginBottom: 10,
-    color:"#fff"
+    color: "#fff",
   },
   result: {
     marginTop: 20,
