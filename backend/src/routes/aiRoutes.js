@@ -42,7 +42,7 @@ Here are the comments:\n\n${comments.join("\n")}\n\nProvide output in JSON forma
       },
       {
         headers: {
-          Authorization: `Bearer 5oxJp70rYDRjlVyKviK4FIRJpnf5dOukW09KApbw`,
+          Authorization: `Bearer 9bkkIVhNyhAXGqRZSGVTeyiMGeJda5H53AmTEZkK`,
           "Content-Type": "application/json",
         },
       }
