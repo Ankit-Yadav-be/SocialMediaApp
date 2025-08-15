@@ -1,0 +1,14 @@
+config:
+  target: "https://social-media-app-six-nu.vercel.app"
+  phases:
+    - duration: 30
+      arrivalRate: 100
+  defaults:
+    headers:
+      Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2NmOGQ5ZDVjZThlYzIzMDJhM2I5MCIsImlhdCI6MTc1NTI4NjY3NywiZXhwIjoxNzU1ODkxNDc3fQ.-YMW3C0Y-Fqd4f8VVp8lOquNqIwuOTdiGi7Un6gvlEo"
+
+scenarios:
+  - name: "Profile Update Load Test"
+    flow:
+      - get:
+          url: "/api/users/update-profile/687cf8d9d5ce8ec2302a3b90"

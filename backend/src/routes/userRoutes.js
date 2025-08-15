@@ -11,10 +11,10 @@ import {
   getAllUsers,
   updateProfile,
 } from "../controllers/userController.js";
-
+import { cacheMiddleware } from "../Redis/cacheMiddleware.js";
 router.get("/", protect, getUsersProfile);
 router.get("/all", protect, getAllUsers);
-router.get("/:id", protect, getUserProfile);
+router.get("/:id", protect,cacheMiddleware, getUserProfile);
 router.put("/:id/follow", protect, followUser);
 router.put("/:id/unfollow", protect, unfollowUser);
 router.get("/:id/followers", protect, getFollowers);

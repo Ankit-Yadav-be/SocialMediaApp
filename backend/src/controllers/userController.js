@@ -19,8 +19,8 @@ export const getUsersProfile = async (req, res) => {
     console.log(req.user._id);
     const user = await User.findById(req.user._id)
       .select("-password")
-      .populate("followers", "name profilePic") // Optional: if you want followers' details
-      .populate("following", "name profilePic"); // Optional: if you want following details
+      .populate("followers", "name profilePic")
+      .populate("following", "name profilePic"); 
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -140,6 +140,8 @@ export const getFollowing = async (req, res) => {
 
 
 
+import client from "../Redis/cacheMiddleware.js"; 
+
 export const updateProfile = async (req, res) => {
   const userId = req.user.id; // from auth middleware
   const { name, username, email, bio, profilePic } = req.body;
@@ -171,6 +173,9 @@ export const updateProfile = async (req, res) => {
       { new: true }
     ).select("-password");
 
+    // Clear Redis cache for this user's profile
+    await client.del(`userProfile:${userId}`);
+
     res.json({
       message: "Profile updated successfully",
       user: updatedUser,
@@ -180,3 +185,4 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ error: "Server error while updating profile" });
   }
 };
+
