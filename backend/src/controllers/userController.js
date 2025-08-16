@@ -1,14 +1,31 @@
 import User from "../models/userModel.js";
+import cache from "../utils/cache.js";
 
 // GET user profile
 export const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id.trim())
+    const userId = req.params.id.trim();
+
+    // 1. Cache check
+    const cachedUser = cache.get(userId);
+    if (cachedUser) {
+      return res.json({ fromCache: true, ...cachedUser });
+    }
+
+    // 2. Agar cache me nahi to DB se fetch
+    const user = await User.findById(userId)
       .select("-password")
-      .populate("followers", " name email bio followers following profilePic")
-      .populate("following", " name email bio followers following profilePic");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+      .populate("followers", "name email bio followers following profilePic")
+      .populate("following", "name email bio followers following profilePic");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 3. Cache me set karo
+    cache.set(userId, user);
+
+    res.json({ fromCache: false, ...user._doc });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
